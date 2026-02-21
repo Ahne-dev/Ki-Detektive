@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KI-Detektive - Die Zentrale</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -15,7 +17,7 @@
             --neon-accent: #22d3ee;
             --success: #10b981;
             --error: #ef4444;
-            --border-color: #e2e8f0;
+            --border-color: #e2e8e0;
             --sidebar-width: 260px;
         }
 
@@ -30,7 +32,7 @@
 
         * {
             box-sizing: border-box;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease-out;
         }
 
         body {
@@ -44,31 +46,34 @@
             overflow-x: hidden;
         }
 
-        /* Print Styles for Certificate */
+        /* Optimierte Druck-Stile für das Zertifikat */
         @media print {
-            body * { visibility: hidden; }
-            #certificate-area, #certificate-area * { visibility: visible; }
+            /* Die gesamte App-Struktur ausblenden, damit kein Platz reserviert wird */
+            body { background: white !important; }
+            .app-wrapper, .sidebar-toggle, .overlay-bg, .zoom-overlay, #main-header { 
+                display: none !important; 
+            }
+            
             #certificate-area {
                 display: block !important;
-                position: fixed;
-                left: 0;
-                top: 0;
+                position: relative; /* Statt fixed, um Layout-Probleme zu vermeiden */
                 width: 210mm;
                 height: 297mm;
                 padding: 15mm;
+                margin: 0;
                 background: white !important;
                 color: black !important;
                 border: 8mm solid #2563eb !important;
-                z-index: 9999;
+                box-sizing: border-box;
+                page-break-after: avoid;
             }
+
             @page {
                 size: A4;
                 margin: 0;
             }
-            .no-print { display: none !important; }
         }
 
-        /* Certificate Preview Style */
         #certificate-area {
             display: none;
             text-align: center;
@@ -148,7 +153,7 @@
             align-items: center;
         }
 
-        .close-btn { background: none; border: none; color: var(--text-color); cursor: pointer; padding: 0; }
+        .close-btn { background: none; border: none; color: var(--text-color); cursor: pointer; }
 
         .nav-item {
             display: flex;
@@ -198,9 +203,8 @@
             gap: 10px;
             justify-content: center;
         }
-        .btn-secondary { background: var(--border-color); color: var(--text-color); }
-        .btn-ghost { background: transparent; border: 2px solid var(--border-color); color: var(--text-color); }
         .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-ghost { background: transparent; border: 2px solid var(--border-color); color: var(--text-color); }
 
         .hub-grid {
             display: grid;
@@ -216,7 +220,6 @@
             border-radius: 24px;
             cursor: pointer;
             position: relative;
-            overflow: hidden;
         }
         .hub-card:hover { border-color: var(--neon-accent); background: rgba(37, 99, 235, 0.05); }
 
@@ -241,38 +244,12 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            position: relative;
             padding: 10px;
             text-align: center;
         }
-
-        .step-tile:hover { border-color: var(--accent-color); background: rgba(37, 99, 235, 0.05); }
-        
-        .step-number {
-            font-weight: 900;
-            font-size: 1.4rem;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .step-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            opacity: 0.8;
-            line-height: 1.2;
-        }
-
+        .step-tile:hover { border-color: var(--accent-color); }
         .step-tile.solved { border-color: var(--success); }
-        .step-tile.solved .step-number { color: var(--success); }
-        .step-tile.solved::after {
-            content: '✓';
-            position: absolute;
-            top: 5px;
-            right: 8px;
-            color: var(--success);
-            font-size: 0.9rem;
-            font-weight: 900;
-        }
+        .step-tile.solved::after { content: '✓'; color: var(--success); font-weight: bold; }
 
         .progress-bar {
             height: 8px;
@@ -281,42 +258,9 @@
             margin: 10px 0;
             overflow: hidden;
         }
-        .progress-fill {
-            height: 100%;
-            background: var(--success);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s ease; }
 
-        .station-box {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 24px;
-            border: 2px solid var(--border-color);
-            margin-top: 20px;
-        }
-
-        .info-step { background: rgba(37, 99, 235, 0.1); border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 0 16px 16px 0; margin-bottom: 20px; }
-        .question-step { margin-top: 20px; }
-
-        .option-btn {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-color);
-            text-align: left;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .option-btn:hover { border-color: var(--accent-color); }
-        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
-        .option-btn.wrong { background: var(--error); color: white; border-color: var(--error); }
-
-        .feedback-area { margin-top: 20px; padding: 15px; border-radius: 12px; font-weight: bold; display: none; }
+        .station-box { background: var(--card-bg); padding: 30px; border-radius: 24px; border: 2px solid var(--border-color); margin-top: 20px; }
 
         .media-container {
             width: 100%;
@@ -326,38 +270,26 @@
             overflow: hidden;
             background: #1e293b;
             position: relative;
-            min-height: 200px;
+            min-height: 250px;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 3px solid var(--border-color);
         }
         .media-container img { width: 100%; height: auto; display: block; cursor: zoom-in; }
-        
-        .zoom-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
+
+        .image-error-fallback {
+            display: none;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            z-index: 5;
+            color: #94a3b8;
+            padding: 20px;
+            text-align: center;
         }
 
-        /* Zoom Overlay */
         .zoom-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9);
             z-index: 200;
             display: none;
@@ -365,63 +297,32 @@
             justify-content: center;
             cursor: zoom-out;
         }
-        .zoom-overlay img {
-            max-width: 95%;
-            max-height: 95%;
-            object-fit: contain;
-            border: 4px solid white;
-            border-radius: 8px;
-        }
         .zoom-overlay.active { display: flex; }
-
-        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-        .hidden { display: none; }
-        .text-center { text-align: center; }
-
-        .overlay-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 90;
-            display: none;
-        }
-        .overlay-bg.active { display: block; }
+        .zoom-overlay img { max-width: 95%; max-height: 95%; border: 4px solid white; border-radius: 8px; }
 
         #timer-display {
             font-family: monospace;
             font-size: 1.4rem;
             font-weight: 700;
             color: var(--accent-color);
-            margin-top: 5px;
             background: rgba(37, 99, 235, 0.1);
             padding: 5px 10px;
             border-radius: 8px;
             display: inline-block;
         }
-        
-        .print-btn-sidebar {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+
+        .option-btn {
+            display: block; width: 100%; padding: 16px; margin: 10px 0;
+            border-radius: 12px; border: 2px solid var(--border-color);
+            background: var(--card-bg); color: var(--text-color);
+            text-align: left; cursor: pointer; font-size: 1rem;
         }
-        .print-btn-sidebar:hover {
-            filter: brightness(1.1);
-            transform: translateY(-2px);
-        }
+        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
+        .option-btn.wrong { background: var(--error); color: white; border-color: var(--error); }
+
+        .feedback-area { margin-top: 20px; padding: 15px; border-radius: 12px; font-weight: bold; display: none; }
+        .info-step { background: rgba(37, 99, 235, 0.1); border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 0 16px 16px 0; margin-bottom: 20px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body class="dark-mode">
@@ -433,102 +334,66 @@
         <img id="zoomed-img" src="" alt="Vergrößert">
     </div>
 
-    <!-- Hidden Printing Area -->
+    <!-- Zertifikat Druckbereich -->
     <div id="certificate-area">
         <div class="cert-border-inner">
             <div class="cert-icon">🔍</div>
             <h1 class="cert-title">Zertifikat</h1>
-            <p style="font-size: 20px; margin-top: 10px;">für den erfolgreichen Abschluss der Ermittlungen</p>
-            <p style="font-size: 18px; margin-top: 20px;">Hiermit wird bescheinigt, dass</p>
-            <div class="cert-name" id="cert-display-name">Meisterdetektiv</div>
-            <p style="font-size: 18px;">wertvolle Spuren in der KI-Detektiv-Zentrale gesichert hat.</p>
-            
+            <p>für den erfolgreichen Abschluss der Ermittlungen</p>
+            <p>Hiermit wird bescheinigt, dass</p>
+            <div class="cert-name" id="cert-display-name">Detektiv</div>
+            <p>wertvolle Spuren in der KI-Detektiv-Zentrale gesichert hat.</p>
             <div style="margin-top: 20px;">
-                <p style="font-size: 18px; margin-bottom: 5px;">Erreichter Fortschritts-Rang:</p>
-                <div class="cert-rank" id="cert-display-rank">Meister-Ermittler</div>
+                <p>Erreichter Fortschritts-Rang:</p>
+                <div class="cert-rank" id="cert-display-rank">Junior-Ermittler</div>
                 <div style="margin-top: 15px;">
-                    <p style="font-size: 18px; margin-bottom: 5px;">Zeit-Spezialisierung:</p>
-                    <div class="cert-time-rank" id="cert-display-time-rank">Blitz-Ermittler (Zeit: 00:00)</div>
+                    <p>Zeit-Spezialisierung:</p>
+                    <div class="cert-time-rank" id="cert-display-time-rank">Blitz-Ermittler</div>
                 </div>
             </div>
-
-            <div style="margin-top: 50px; display: flex; justify-content: space-around; width: 100%;">
-                <div style="border-top: 1px solid black; padding-top: 10px; width: 150px;">Datum: <span id="cert-display-date"></span></div>
-                <div style="border-top: 1px solid black; padding-top: 10px; width: 150px;">Unterschrift</div>
+            <div style="margin-top: 50px; display: flex; justify-content: space-around;">
+                <div>Datum: <span id="cert-display-date"></span></div>
+                <div>Unterschrift</div>
             </div>
-            <div style="position: absolute; bottom: 20px; right: 20px; opacity: 0.1; font-size: 12px;">KI-DETEKTIV-SYSTEM v1.3</div>
         </div>
     </div>
 
     <div class="app-wrapper">
-        
-        <!-- SIDEBAR LEFT: NAVIGATION -->
+        <!-- Sidebar Navigation -->
         <aside class="sidebar-left" id="sidebar-left">
-            <div class="sidebar-title">
-                Ermittlungen
-                <button class="close-btn" onclick="toggleLeftSidebar()"><i data-lucide="x"></i></button>
-            </div>
-            <div class="nav-item" id="nav-hub" onclick="goToHub(); toggleLeftSidebar();">
-                <i data-lucide="layout-grid"></i> Zentrale
-            </div>
-            <div class="nav-item" id="nav-img" onclick="openMissionMenu('img'); toggleLeftSidebar();">
-                <i data-lucide="image"></i> Bild-Labor
-            </div>
-            <div class="nav-item" id="nav-txt" onclick="openMissionMenu('txt'); toggleLeftSidebar();">
-                <i data-lucide="message-square"></i> Text-Check
-            </div>
-            <div class="nav-item" id="nav-fak" onclick="openMissionMenu('fak'); toggleLeftSidebar();">
-                <i data-lucide="help-circle"></i> Fakten-Radar
-            </div>
-            <div class="nav-item" id="nav-dat" onclick="openMissionMenu('dat'); toggleLeftSidebar();">
-                <i data-lucide="lock"></i> Sicherheit
-            </div>
+            <div class="sidebar-title">Ermittlungen <button class="close-btn" onclick="toggleLeftSidebar()"><i data-lucide="x"></i></button></div>
+            <div class="nav-item" id="nav-hub" onclick="goToHub(); toggleLeftSidebar();"><i data-lucide="layout-grid"></i> Zentrale</div>
+            <div class="nav-item" onclick="openMissionMenu('img'); toggleLeftSidebar();"><i data-lucide="image"></i> Bild-Labor</div>
+            <div class="nav-item" onclick="openMissionMenu('txt'); toggleLeftSidebar();"><i data-lucide="message-square"></i> Text-Check</div>
+            <div class="nav-item" onclick="openMissionMenu('fak'); toggleLeftSidebar();"><i data-lucide="help-circle"></i> Fakten-Radar</div>
+            <div class="nav-item" onclick="openMissionMenu('dat'); toggleLeftSidebar();"><i data-lucide="lock"></i> Sicherheit</div>
         </aside>
 
-        <button class="sidebar-toggle toggle-left hidden" id="btn-toggle-left" onclick="toggleLeftSidebar()">
-            <i data-lucide="menu"></i>
-        </button>
+        <button class="sidebar-toggle toggle-left hidden" id="btn-toggle-left" onclick="toggleLeftSidebar()"><i data-lucide="menu"></i></button>
 
-        <!-- MAIN CONTENT AREA -->
         <main class="container">
-            
-            <!-- HEADER -->
             <header id="main-header" class="hidden">
-                <div style="display: flex; align-items: center; gap: 10px; font-weight: 800;">
-                    <i data-lucide="search" style="color: var(--neon-accent)"></i> KI-Detektive
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-ghost" style="padding: 8px 12px;" onclick="toggleDarkMode()">
-                        <i data-lucide="moon"></i>
-                    </button>
-                </div>
+                <div style="font-weight: 800;"><i data-lucide="search"></i> KI-Detektive</div>
+                <button class="btn btn-ghost" onclick="toggleDarkMode()"><i data-lucide="moon"></i></button>
             </header>
 
-            <!-- INTRO VIEW -->
+            <!-- Intro -->
             <div id="view-intro" class="view active">
-                <div class="station-box text-center" style="margin-top: 40px;">
-                    <i data-lucide="shield-check" style="width: 64px; height: 64px; color: var(--accent-color); margin-bottom: 20px;"></i>
+                <div class="station-box text-center">
+                    <i data-lucide="shield-check" style="width: 64px; height: 64px; color: var(--accent-color);"></i>
                     <h1>Einsatzbereit, Detektiv?</h1>
-                    <p>Lerne die Tricks der KI kennen und werde zum Profi-Ermittler.</p>
-                    
-                    <div style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 15px; border-radius: 12px; margin: 20px 0; text-align: left; font-size: 0.9rem;">
-                        <strong>🛡️ Datenschutz:</strong> Benutze keinen echten Namen.
-                    </div>
-
-                    <input type="text" id="nameInput" placeholder="Dein Detektiv-Name" style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--border-color); margin-bottom: 10px; background: var(--card-bg); color: var(--text-color);">
-                    
+                    <p>Werde zum Profi-Ermittler im KI-Zeitalter.</p>
+                    <input type="text" id="nameInput" placeholder="Dein Detektiv-Name" style="width: 100%; padding: 15px; border-radius: 12px; border: 2px solid var(--border-color); margin: 20px 0; background: var(--card-bg); color: var(--text-color);">
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="btn" onclick="startMission(false)">Mission starten <i data-lucide="play"></i></button>
+                        <button class="btn" onclick="startMission(false)">Mission starten</button>
                         <button class="btn btn-ghost" onclick="startMission(true)">Zufälliger Name</button>
                     </div>
                 </div>
             </div>
 
-            <!-- HUB VIEW -->
+            <!-- Hub -->
             <div id="view-hub" class="view">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>Einsatz-Zentrale</h2>
-                </div>
+                <h2>Einsatz-Zentrale</h2>
                 <div class="hub-grid">
                     <div class="hub-card" onclick="openMissionMenu('img')">
                         <div style="display: flex; justify-content: space-between;"><i data-lucide="image"></i><span id="prog-img-text">0/10</span></div>
@@ -553,179 +418,136 @@
                 </div>
             </div>
 
-            <!-- MISSION OVERVIEW VIEW -->
+            <!-- Mission Menu -->
             <div id="view-mission-menu" class="view">
-                <button class="btn btn-ghost" onclick="goToHub()" style="margin-bottom: 20px;">
-                    <i data-lucide="arrow-left"></i> Zurück zur Zentrale
-                </button>
+                <button class="btn btn-ghost" onclick="goToHub()"><i data-lucide="arrow-left"></i> Zurück</button>
                 <div class="station-box">
                     <h2 id="menuTitle">Mission wählen</h2>
-                    <p>Wähle eine Station aus. Grün abgehakte Stationen hast du bereits gelöst!</p>
-                    <div class="mission-overview-grid" id="missionGrid">
-                        <!-- Tiles generated via JS -->
-                    </div>
+                    <div class="mission-overview-grid" id="missionGrid"></div>
                 </div>
             </div>
 
-            <!-- MISSION VIEW -->
+            <!-- Mission Play -->
             <div id="view-mission" class="view">
-                <button class="btn btn-ghost" onclick="backToMenu()" style="margin-bottom: 20px;">
-                    <i data-lucide="grid"></i> Zur Stations-Wahl
-                </button>
+                <button class="btn btn-ghost" onclick="backToMenu()"><i data-lucide="grid"></i> Übersicht</button>
                 <div class="station-box">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h2 id="missionTitle">Mission</h2>
-                        <span id="stepCounter" style="font-weight: bold; color: var(--accent-color);">Station 1/10</span>
+                        <span id="stepCounter">Station 1/10</span>
                     </div>
-
                     <div id="step-media" class="media-container hidden">
-                        <button class="zoom-btn" onclick="toggleZoom()" title="Vergrößern"><i data-lucide="maximize-2"></i></button>
-                        <img id="missionImg" src="" alt="Spur" onclick="toggleZoom()">
+                        <img id="missionImg" src="" alt="Spur" onclick="toggleZoom()" onerror="handleImageError()">
+                        <div id="image-error-box" class="image-error-fallback">
+                            <i data-lucide="image-off"></i><span>Bild fehlt im assets-Ordner!</span>
+                        </div>
                     </div>
-
                     <div id="step-info" class="info-step">
                         <h3>💡 Detektiv-Wissen</h3>
                         <p id="info-text"></p>
-                        <button class="btn" onclick="showQuestion()">Gelesen! <i data-lucide="check"></i></button>
+                        <button class="btn" onclick="showQuestion()">Gelesen!</button>
                     </div>
-
                     <div id="step-question" class="question-step hidden">
-                        <h3 id="question-text">Frage?</h3>
+                        <h3 id="question-text"></h3>
                         <div id="question-options"></div>
                         <div id="feedback-msg" class="feedback-area"></div>
-                        <button id="next-btn" class="btn hidden" onclick="nextStep()" style="margin-top: 20px; width: 100%;">Nächste Station <i data-lucide="arrow-right"></i></button>
+                        <button id="next-btn" class="btn hidden" onclick="nextStep()" style="width: 100%;">Weiter <i data-lucide="arrow-right"></i></button>
                     </div>
                 </div>
             </div>
 
-            <!-- FINISH VIEW -->
-            <div id="view-finish" class="view">
-                <div class="station-box text-center">
+            <!-- Finish -->
+            <div id="view-finish" class="view text-center">
+                <div class="station-box">
                     <i data-lucide="party-popper" style="width: 80px; height: 80px; color: gold;"></i>
                     <h1 id="finish-congrats">Super!</h1>
                     <p id="finish-text"></p>
-                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
-                        <button class="btn" onclick="printCertificate()">
-                            <i data-lucide="printer"></i> Zertifikat drucken
-                        </button>
-                        <button class="btn btn-secondary" onclick="backToMenu()">
-                            Zur Stations-Übersicht
-                        </button>
-                    </div>
+                    <button class="btn" onclick="printCertificate()"><i data-lucide="printer"></i> Zertifikat drucken</button>
                 </div>
             </div>
-
         </main>
 
-        <!-- SIDEBAR RIGHT: STATUS -->
+        <!-- Sidebar Right Status -->
         <aside class="sidebar-right" id="sidebar-right">
-            <div class="sidebar-title">
-                Detektiv-Status
-                <button class="close-btn" onclick="toggleRightSidebar()"><i data-lucide="x"></i></button>
-            </div>
-            
+            <div class="sidebar-title">Status <button class="close-btn" onclick="toggleRightSidebar()"><i data-lucide="x"></i></button></div>
             <div class="status-card">
-                <div style="font-weight: 800; font-size: 1.1rem; margin-bottom: 5px;" id="status-name">Detektiv</div>
-                <div id="status-rank" style="font-size: 0.8rem; color: var(--accent-color); font-weight: 700;">Junior-Ermittler</div>
-                
-                <div style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
-                    <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; font-weight: 800;">Einsatzzeit</div>
-                    <div id="timer-display">00:00</div>
-                </div>
+                <div id="status-name" style="font-weight: 800;">Detektiv</div>
+                <div id="status-rank" style="color: var(--accent-color); font-size: 0.8rem;">Junior-Ermittler</div>
+                <div style="margin-top: 10px;">Zeit: <div id="timer-display">00:00</div></div>
             </div>
-            
-            <div class="sidebar-title">Gesamt-Fortschritt</div>
+            <div class="sidebar-title">Fortschritt</div>
             <div class="status-card text-center">
-                <div style="font-size: 1.5rem; font-weight: 900;" id="total-percent">0%</div>
+                <div id="total-percent" style="font-size: 1.5rem; font-weight: 900;">0%</div>
                 <div class="progress-bar"><div id="total-progress-fill" class="progress-fill"></div></div>
             </div>
-
-            <div class="sidebar-title">Aktionen</div>
-            <div class="status-card">
-                <button class="print-btn-sidebar" onclick="printCertificate()">
-                    <i data-lucide="printer"></i> Zertifikat erstellen
-                </button>
-                <p style="font-size: 0.7rem; margin-top: 8px; opacity: 0.7; text-align: center;">Drucke deinen aktuellen Stand jederzeit aus!</p>
-            </div>
+            <button class="btn" style="width: 100%;" onclick="printCertificate()"><i data-lucide="printer"></i> Zertifikat</button>
         </aside>
 
-        <button class="sidebar-toggle toggle-right hidden" id="btn-toggle-right" onclick="toggleRightSidebar()">
-            <i data-lucide="user"></i>
-        </button>
-
+        <button class="sidebar-toggle toggle-right hidden" id="btn-toggle-right" onclick="toggleRightSidebar()"><i data-lucide="user"></i></button>
     </div>
 
     <script>
         lucide.createIcons();
-
         let detectiveName = "Unbekannt";
-        let currentMissionType = "";
-        let currentStepIndex = 0;
-        let timerInterval = null;
+        let currentType = "";
+        let currentIndex = 0;
         let totalSeconds = 0;
-        
-        // Progress storage
+        let timerInterval = null;
         let missionProgress = { img: [], txt: [], fak: [], dat: [] };
 
-        const randomNames = ["Schatten-Eule", "Turbo-Dachs", "Pixel-Luchs", "Daten-Fuchs", "Code-Panther", "Geheim-Gepard"];
-        const positiveFeedback = ["Spitzenklasse!", "Du hast den Durchblick!", "Echter Profi-Blick!", "Wow!", "Absolut richtig!", "Korrekt!"];
-        const retryFeedback = ["Guter Versuch! Schau nochmal genau hin.", "Fast richtig!", "Probier es nochmal!"];
-
+        const randomNames = ["Daten-Fuchs", "Code-Eule", "Pixel-Luchs", "Cyber-Dachs"];
         const missionData = {
             img: [
-                { short: "Finger", media: "ki-hand.png", info: "KIs haben oft Probleme mit Händen. Sie wissen nicht genau, dass Menschen immer 5 Finger haben.", q: "Wie viele Finger hat ein Mensch normalerweise an einer Hand?", a: ["4 Finger", "5 Finger", "6 Finger"], c: 1 },
-                { short: "Hintergrund", media: "ki-hintergrund.png", info: "Hintergründe in KI-Bildern sind oft verschwommen. Fenster oder Linien wirken verbogen.", q: "Worauf solltest du im Hintergrund achten?", a: ["Ob die Linien gerade sind.", "Ob die Sonne scheint.", "Ob da Blumen sind."], c: 0 },
-                { short: "Haut", media: "ki-haut.png", info: "KI-Menschen haben oft perfekte Haut, die wie Plastik aussieht.", q: "Wie sieht die Haut bei KI-Menschen oft aus?", a: ["Zu glatt und perfekt.", "Dreckig.", "Sehr faltig."], c: 0 },
-                { short: "Ohren", media: "ki-ohren.png", info: "Schau auf die Ohren! KIs zeichnen oft zwei verschiedene Ohrringe.", q: "Was stimmt bei KI-Ohren oft nicht?", a: ["Sie sind grün.", "Sie fehlen ganz.", "Sie sehen unterschiedlich aus."], c: 2 },
-                { short: "Brille", media: "ki-brille.png", info: "Brillen sind für die KI eine echte Herausforderung. Oft verschmilzt der Rahmen einfach mit dem Kopf.", q: "Was ist bei dieser Brille der Fehler?", a: ["Sie ist schief.", "Der Rahmen verbindet sich mit den Haaren.", "Sie hat keine Gläser."], c: 1 },
-                { short: "Schilder", media: "ki-schild.png", info: "Texte auf Schilder im Hintergrund sind meistens Fantasie-Buchstaben.", q: "Kann man Text in KI-Bildern gut lesen?", a: ["Ja.", "Oft sind es nur komische Zeichen.", "Nur im Dunkeln."], c: 1 },
-                { short: "Schatten", media: "ki-schatten.png", info: "KIs machen oft Fehler bei Licht und Schatten.", q: "Was stimmt beim Schatten oft nicht?", a: ["Er zeigt in die falsche Richtung.", "Er ist bunt.", "Er bewegt sich."], c: 0 },
-                { short: "Zähne", media: "ki-zaehne.png", info: "Zähne sind schwer! KIs malen manchmal zu viele Zähne.", q: "Worauf achtest du beim Lächeln?", a: ["Ob die Zähne sauber sind.", "Ob es zu viele Zähne sind.", "Ob die Zähne weiß sind."], c: 1 },
-                { short: "Kleidung", media: "ki-kleidung.png", info: "Kleidung verschmilzt bei KIs manchmal mit der Umgebung.", q: "Was passiert manchmal mit der Kleidung?", a: ["Sie ändert die Farbe.", "Sie verschmilzt mit dem Stuhl.", "Sie wird unsichtbar."], c: 1 },
-                { short: "Haare", media: "ki-haare.png", info: "Haare sehen bei KIs oft wie gemalt aus.", q: "Wie wirken Haare bei KI-Bildern?", a: ["Vollkommen echt.", "Etwas unnatürlich.", "Sie sind immer kurz."], c: 1 }
+                { short: "Finger", media: "ki-hand.png", info: "KIs zeichnen oft 6 Finger.", q: "Wie viele Finger hat ein Mensch normal?", a: ["4 Finger", "5 Finger", "6 Finger"], c: 1 },
+                { short: "Brille", media: "ki-brille.png", info: "Brillenrahmen verschmelzen oft mit Haaren.", q: "Was ist hier der Fehler?", a: ["Schief", "Verschmilzt mit Haaren", "Keine Gläser"], c: 1 },
+                { short: "Hintergrund", media: "ki-hintergrund.png", info: "Linien im Hintergrund wirken oft verbogen.", q: "Worauf achtest du?", a: ["Auf Schatten", "Auf gerade Linien", "Auf die Farben"], c: 1 },
+                { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft wie glattes Plastik.", q: "Wie sieht die Haut aus?", a: ["Zu glatt", "Zu faltig", "Dreckig"], c: 0 },
+                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe sehen oft unterschiedlich aus.", q: "Worauf achtest du?", a: ["Auf die Ohren", "Auf die Nase", "Auf den Mund"], c: 0 },
+                { short: "Text", media: "ki-text.png", info: "Schrift in KI-Bildern ist oft unleserlich.", q: "Kann man den Text lesen?", a: ["Ja", "Oft nicht", "Nur nachts"], c: 1 },
+                { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen.", q: "Was stimmt nicht?", a: ["Das Licht", "Das Wetter", "Die Kleidung"], c: 0 },
+                { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne.", q: "Wie viele Zähne?", a: ["Zu viele", "Zu wenige", "Gar keine"], c: 0 },
+                { short: "Struktur", media: "ki-struktur.png", info: "Muster wiederholen sich oft unnatürlich.", q: "Was stimmt hier nicht?", a: ["Das Muster", "Die Größe", "Der Name"], c: 0 },
+                { short: "Anatomie", media: "ki-anatomie.png", info: "Gliedmaßen sind oft an falschen Stellen.", q: "Was passt nicht?", a: ["Körperteile", "Die Kleidung", "Das Gesicht"], c: 0 }
             ],
             txt: [
-                { short: "Höflichkeit", info: "KI-Chatbots sind immer extrem höflich.", q: "Wie antwortet eine KI meistens?", a: ["Frech.", "Sehr höflich und nett.", "Garnicht."], c: 1 },
-                { short: "Wiederholung", info: "KIs wiederholen sich oft.", q: "Was machen KIs beim Schreiben oft?", a: ["Sie fluchen.", "Sie wiederholen Informationen.", "Sie schreiben nur ein Wort."], c: 1 },
-                { short: "Tippfehler", info: "Echte Kinder machen manchmal Tippfehler. KIs schreiben fast perfekt.", q: "Wer macht eher mal einen Rechtschreibfehler?", a: ["Die KI.", "Ein Mensch beim Tippen.", "Niemand."], c: 1 },
-                { short: "Gefühle", info: "KIs haben keine echten Gefühle.", q: "Kann eine KI wirklich traurig sein?", a: ["Ja.", "Nein, sie tut nur so.", "Nur wenn es regnet."], c: 1 },
-                { short: "Satzbau", info: "KIs benutzen oft sehr lange und komplizierte Sätze.", q: "Welchen Satz würde ein Kind sagen?", a: ["Die Analyse ergibt Pizza.", "Ich hab voll Hunger auf Pizza!", "Hunger ist biologisch."], c: 1 },
-                { short: "Meinung", info: "Eine KI darf oft keine eigene Meinung haben.", q: "Was sagt eine KI oft bei Lieblingsfarben?", a: ["Blau ist gut.", "Ich habe keine Vorlieben.", "Rot ist die beste!"], c: 1 },
-                { short: "Wissen", info: "KIs kennen keine Geheimnisse aus deiner Schule.", q: "Was weiß eine KI nicht?", a: ["Wer in deiner Klasse gestern gelacht hat.", "1+1.", "Dass die Erde rund ist."], c: 0 },
-                { short: "Witze", info: "KIs können keine echten Witze verstehen.", q: "Was macht eine KI mit einem Witz?", a: ["Sie lacht.", "Sie erklärt ihn trocken.", "Sie löscht ihn."], c: 1 },
-                { short: "Schnelligkeit", info: "KIs schreiben ganze Texte in Sekunden.", q: "Wie schnell schreibt eine KI?", a: ["Sehr langsam.", "In Sekunden.", "Wie ein Mensch."], c: 1 },
-                { short: "Kennung", info: "KIs sagen oft: 'Als KI-Modell kann ich...'.", q: "Welcher Satz verrät die KI?", a: ["'Ich bin ein Mensch.'", "'Als KI-Modell kann ich helfen.'", "'Hallo.'"], c: 1 }
+                { short: "Höflichkeit", info: "KIs sind extrem höflich.", q: "Wie schreibt eine KI?", a: ["Frech", "Sehr höflich", "Wütend"], c: 1 },
+                { short: "Wortwahl", info: "KIs benutzen oft komplizierte Wörter.", q: "Welche Wörter?", a: ["Einfache", "Komplizierte", "Keine"], c: 1 },
+                { short: "Fehler", info: "KIs machen fast nie Rechtschreibfehler.", q: "Machen sie Fehler?", a: ["Ja, viele", "Fast nie", "Nur sonntags"], c: 1 },
+                { short: "Gefühle", info: "KIs haben keine echten Emotionen.", q: "Haben sie Gefühle?", a: ["Ja", "Nein", "Manchmal"], c: 1 },
+                { short: "Satzbau", info: "Sätze sind oft perfekt gebaut.", q: "Wie ist der Satzbau?", a: ["Chaotisch", "Perfekt", "Kurz"], c: 1 },
+                { short: "Wiederholung", info: "KIs wiederholen oft Informationen.", q: "Was passiert oft?", a: ["Wiederholung", "Stille", "Witze"], c: 0 },
+                { short: "Wissen", info: "KIs wissen nichts über dich persönlich.", q: "Was wissen sie?", a: ["Alles", "Nichts privates", "Dein Alter"], c: 1 },
+                { short: "Witze", info: "KI-Witze sind oft trocken oder unlogisch.", q: "Wie sind Witze?", a: ["Lustig", "Oft unlogisch", "Super"], c: 1 },
+                { short: "Tempo", info: "KIs schreiben ganze Seiten in Sekunden.", q: "Wie schnell?", a: ["Langsam", "In Sekunden", "Minuten"], c: 1 },
+                { short: "Stil", info: "Der Stil bleibt immer gleich sachlich.", q: "Wie ist der Stil?", a: ["Sachlich", "Emotional", "Böse"], c: 0 }
             ],
             fak: [
-                { short: "Halluzinieren", info: "KIs können schwindeln! Man nennt das 'Halluzinieren'.", q: "Darfst du einer KI alles glauben?", a: ["Ja.", "Nein, man muss alles prüfen!", "Nur Montags."], c: 1 },
-                { short: "Mathe", info: "KIs sind nicht gut im Rechnen mit sehr großen Zahlen.", q: "Sind KIs perfekte Mathe-Genies?", a: ["Ja.", "Nein, sie machen Rechenfehler.", "Nur im Internet."], c: 1 },
-                { short: "Aktualität", info: "KIs wissen oft nicht, was HEUTE passiert ist.", q: "Was weiß eine KI vielleicht nicht?", a: ["Nachrichten von heute.", "Was vor 100 Jahren war.", "Dass es Drachen nicht gibt."], c: 0 },
-                { short: "Quellen", info: "KIs erfinden manchmal Quellen, die es gar nicht gibt.", q: "Was solltest du bei Links tun?", a: ["Klicken.", "Prüfen, ob es die Seite gibt.", "Ignorieren."], c: 1 },
-                { short: "Experimente", info: "KIs können keine echten Experimente machen.", q: "Wie lernt eine KI?", a: ["In der Schule.", "Durch Lesen von Texten.", "In der Küche."], c: 1 },
-                { short: "Geschmack", info: "Eine KI kennt Rezepte, aber sie hat sie nie gekostet.", q: "Kann die KI wissen, ob Essen lecker ist?", a: ["Ja.", "Nein, nur die Zutaten.", "Nur auf Fotos."], c: 1 },
-                { short: "Medizin", info: "KIs geben manchmal gefährliche Tipps.", q: "Wem vertraust du bei Medizin?", a: ["Der KI.", "Einem echten Arzt!", "Garniemandem."], c: 1 },
-                { short: "Personen", info: "KIs verwechseln manchmal Personen.", q: "Warum macht die KI Fehler bei Namen?", a: ["Sie ist böse.", "Sie bringt Infos durcheinander.", "Sie hat keine Lust."], c: 1 },
-                { short: "Privatleben", info: "KIs wissen nichts über dein privates Leben.", q: "Was weiß eine KI über dich?", a: ["Alles.", "Nur was ich ihr schreibe.", "Mein Passwort."], c: 1 },
-                { short: "Prüfung", info: "Detektive nutzen immer zwei Quellen zum Prüfen.", q: "Wie prüfst du eine Info?", a: ["Garnicht.", "KI nochmal fragen.", "In einem Buch suchen."], c: 2 }
+                { short: "Lügen", info: "KIs erfinden manchmal Fakten (Halluzination).", q: "Sagen sie immer die Wahrheit?", a: ["Ja", "Nein, sie flunkern", "Nur im Winter"], c: 1 },
+                { short: "Quellen", info: "KIs können keine echten Quellen nennen.", q: "Haben sie Quellen?", a: ["Ja", "Oft erfunden", "Immer"], c: 1 },
+                { short: "Aktualität", info: "KIs wissen oft nichts von heute.", q: "Wissen sie alles?", a: ["Ja", "Nicht das Aktuelle", "Nur Sport"], c: 1 },
+                { short: "Logik", info: "Einfache Logikrätsel schlagen oft fehl.", q: "Sind sie logisch?", a: ["Immer", "Nicht immer", "Gar nicht"], c: 1 },
+                { short: "Mathe", info: "KIs machen oft Fehler beim Rechnen.", q: "Können sie rechnen?", a: ["Perfekt", "Oft fehlerhaft", "Nur Plus"], c: 1 },
+                { short: "Experimente", info: "KIs können nicht experimentieren.", q: "Probieren sie Dinge aus?", a: ["Ja", "Nein", "Oft"], c: 1 },
+                { short: "Meinung", info: "KIs haben keine eigene Meinung.", q: "Haben sie eine Meinung?", a: ["Ja", "Nein", "Immer"], c: 1 },
+                { short: "Zukunft", info: "KIs können nicht hellsehen.", q: "Wissen sie die Zukunft?", a: ["Ja", "Nein", "Vielleicht"], c: 1 },
+                { short: "Werte", info: "KIs haben keine Moral.", q: "Haben sie Werte?", a: ["Ja", "Nein", "Immer"], c: 1 },
+                { short: "Prüfung", info: "Man muss Informationen immer prüfen.", q: "Sollte man prüfen?", a: ["Ja, immer!", "Nein", "Egal"], c: 0 }
             ],
             dat: [
-                { short: "Name", info: "Dein Name ist privat.", q: "Was sagst du der KI nicht?", a: ["Lieblingsfilm.", "Vollen Namen.", "Dass du Eis magst."], c: 1 },
-                { short: "Adresse", info: "Deine Adresse verrät, wo du wohnst.", q: "Darf die KI deine Straße wissen?", a: ["Nein!", "Ja.", "Vielleicht."], c: 0 },
-                { short: "Passwort", info: "Passwörter sind wie Hausschlüssel.", q: "Wem gibst du dein Passwort?", a: ["Freundin.", "Computer.", "Niemandem außer Eltern."], c: 2 },
-                { short: "Fotos", info: "Bilder von dir sind kostbar.", q: "Was passiert mit Fotos bei der KI?", a: ["Werden gelöscht.", "Werden gelernt und gespeichert.", "Werden ausgedruckt."], c: 1 },
-                { short: "Kamera", info: "Kameras kann man zukleben.", q: "Warum kleben Leute die Kamera ab?", a: ["Staubschutz.", "Sicherheit vor Zuschauern.", "Dekoration."], c: 1 },
-                { short: "Fremde", info: "Fremde im Netz? Sag es deinen Eltern!", q: "Was tust du bei seltsamen Fragen?", a: ["Antworten.", "Eltern Bescheid sagen.", "Nichts."], c: 1 },
-                { short: "Abmelden", info: "Melde dich an fremden PCs immer ab.", q: "Was hilft beim Datenschutz?", a: ["Ausschalten.", "Abmelden.", "Zudecken."], c: 1 },
-                { short: "Gratis-Spiele", info: "Gratis-Spiele wollen oft deine Daten.", q: "Warum sind Spiele kostenlos?", a: ["Nettigkeit.", "Datenverkauf.", "Zufall."], c: 1 },
-                { short: "Erlaubnis", info: "Apps fragen nach Mikrofon-Erlaubnis. Sag oft Nein.", q: "Muss eine Mal-App wissen, wo du bist?", a: ["Ja.", "Nein!", "Immer."], c: 1 },
-                { short: "Datenschatz", info: "Deine Daten sind ein Schatz.", q: "Wie gehst du mit Daten um?", a: ["Vorsichtig.", "Großzügig.", "Egal."], c: 0 }
+                { short: "Name", info: "Gib niemals deinen echten Namen ein.", q: "Was gibst du an?", a: ["Echten Namen", "Spitznamen", "Adresse"], c: 1 },
+                { short: "Adresse", info: "Deine Adresse ist privat.", q: "Darf die KI sie wissen?", a: ["Ja", "Nein", "Immer"], c: 1 },
+                { short: "Fotos", info: "Lade keine privaten Fotos hoch.", q: "Darfst du Fotos zeigen?", a: ["Ja", "Nein", "Immer"], c: 1 },
+                { short: "Passwort", info: "Gib niemals Passwörter ein.", q: "Verrätst du Passwörter?", a: ["Ja", "Niemals!", "Immer"], c: 1 },
+                { short: "Schule", info: "Nenne nicht den Namen deiner Schule.", q: "Was nennst du?", a: ["Schulname", "Nichts", "Klassenraum"], c: 1 },
+                { short: "Familie", info: "Erzähle nichts über deine Familie.", q: "Was ist privat?", a: ["Alles", "Nichts", "Essen"], c: 0 },
+                { short: "Geheimnisse", info: "KIs speichern alles.", q: "Solltest du Geheimnisse sagen?", a: ["Ja", "Nein!", "Vielleicht"], c: 1 },
+                { short: "Standort", info: "Deaktiviere den Standort.", q: "Was ist wichtig?", a: ["Anlassen", "Ausschalten", "Egal"], c: 1 },
+                { short: "Abmeldung", info: "Melde dich immer ab.", q: "Was tust du am Ende?", a: ["Anlassen", "Abmelden", "Weglaufen"], c: 1 },
+                { short: "Sicherheit", info: "Sicherheit geht vor.", q: "Was ist am wichtigsten?", a: ["Tempo", "Sicherheit", "Spaß"], c: 1 }
             ]
         };
 
         function startMission(isRandom) {
-            const input = document.getElementById('nameInput').value.trim();
-            detectiveName = (isRandom || input === "") ? randomNames[Math.floor(Math.random() * randomNames.length)] : input;
-            
+            detectiveName = isRandom ? randomNames[Math.floor(Math.random()*randomNames.length)] : document.getElementById('nameInput').value || "Detektiv";
             document.getElementById('status-name').innerText = detectiveName;
             document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('btn-toggle-left').classList.remove('hidden');
@@ -735,235 +557,130 @@
             updateUI();
         }
 
-        // Timer Logic (Scale: 45 min lesson)
         function startTimer() {
             if(timerInterval) return;
-            totalSeconds = 0;
             timerInterval = setInterval(() => {
                 totalSeconds++;
-                updateTimerDisplay();
+                const min = String(Math.floor(totalSeconds/60)).padStart(2,'0');
+                const sec = String(totalSeconds%60).padStart(2,'0');
+                document.getElementById('timer-display').innerText = `${min}:${sec}`;
             }, 1000);
         }
 
-        function updateTimerDisplay() {
-            const min = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const sec = String(totalSeconds % 60).padStart(2, '0');
-            document.getElementById('timer-display').innerText = `${min}:${sec}`;
-        }
-
         function getTimeRank() {
-            const minutes = totalSeconds / 60;
-            if (minutes < 10) return "Blitz-Ermittler (Extrem schnell!)";
-            if (minutes < 20) return "Turbo-Ermittler (Sehr hohes Tempo!)";
-            if (minutes < 30) return "Scharfsinn-Profi (Gute Zeiteinteilung!)";
-            if (minutes <= 45) return "Ausdauer-Experte (Konzentrierter Lerner!)";
-            return "Gründlicher Beobachter (Nimmt sich Zeit für Details!)";
+            const min = totalSeconds / 60;
+            if(min < 10) return "Blitz-Ermittler (Sehr schnell!)";
+            if(min < 25) return "Turbo-Ermittler (Flottes Tempo!)";
+            if(min < 45) return "Scharfsinn-Profi (Gute Ausdauer!)";
+            return "Gründlicher Beobachter (Nimmt sich Zeit!)";
         }
 
-        // Zoom Logic
-        function toggleZoom() {
-            const overlay = document.getElementById('zoom-overlay');
-            const zoomedImg = document.getElementById('zoomed-img');
-            const missionImg = document.getElementById('missionImg');
-            
-            if (overlay.classList.contains('active')) {
-                overlay.classList.remove('active');
-            } else {
-                zoomedImg.src = missionImg.src;
-                overlay.classList.add('active');
-            }
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
         }
 
-        // Sidebar Handling
-        function toggleLeftSidebar() {
-            const sidebar = document.getElementById('sidebar-left');
-            const overlay = document.getElementById('overlay-bg');
-            sidebar.classList.toggle('open');
-            if(sidebar.classList.contains('open')) overlay.classList.add('active');
-            else if(!document.getElementById('sidebar-right').classList.contains('open')) overlay.classList.remove('active');
-        }
-
-        function toggleRightSidebar() {
-            const sidebar = document.getElementById('sidebar-right');
-            const overlay = document.getElementById('overlay-bg');
-            sidebar.classList.toggle('open');
-            if(sidebar.classList.contains('open')) overlay.classList.add('active');
-            else if(!document.getElementById('sidebar-left').classList.contains('open')) overlay.classList.remove('active');
-        }
-
-        function closeSidebars() {
-            document.getElementById('sidebar-left').classList.remove('open');
-            document.getElementById('sidebar-right').classList.remove('open');
-            document.getElementById('overlay-bg').classList.remove('active');
-        }
-
-        // Mission Logic
         function openMissionMenu(type) {
-            currentMissionType = type;
-            document.getElementById('menuTitle').innerText = getTitle(type);
+            currentType = type;
+            document.getElementById('menuTitle').innerText = type === 'img' ? 'Bild-Labor' : type === 'txt' ? 'Text-Check' : type === 'fak' ? 'Fakten-Radar' : 'Sicherheit';
             const grid = document.getElementById('missionGrid');
             grid.innerHTML = "";
-            
-            for (let i = 0; i < 10; i++) {
-                const step = missionData[type][i];
+            const data = missionData[type] || Array(10).fill({short: "Station"});
+            data.forEach((s, i) => {
                 const tile = document.createElement('div');
-                tile.className = "step-tile";
-                if (missionProgress[type].includes(i)) tile.classList.add('solved');
-                
-                tile.innerHTML = `
-                    <div class="step-number">${i + 1}</div>
-                    <div class="step-label">${step.short}</div>
-                `;
-                
-                tile.onclick = () => initMissionStep(i);
+                tile.className = "step-tile" + (missionProgress[type].includes(i) ? " solved" : "");
+                tile.innerHTML = `<div>${i+1}</div><small>${s.short}</small>`;
+                tile.onclick = () => { currentIndex = i; loadStep(); showView('view-mission'); };
                 grid.appendChild(tile);
-            }
+            });
             showView('view-mission-menu');
         }
 
-        function initMissionStep(index) {
-            currentStepIndex = index;
-            showView('view-mission');
-            loadStep();
-        }
-
         function loadStep() {
-            const step = missionData[currentMissionType][currentStepIndex];
-            document.getElementById('missionTitle').innerText = getTitle(currentMissionType);
-            document.getElementById('stepCounter').innerText = `Station ${currentStepIndex + 1}/10`;
-            
-            const mediaCont = document.getElementById('step-media');
-            const missionImg = document.getElementById('missionImg');
-            if (step.media) {
-                mediaCont.classList.remove('hidden');
-                missionImg.src = `assets/${step.media}`;
-            } else {
-                mediaCont.classList.add('hidden');
-            }
-
+            const step = missionData[currentType]?.[currentIndex] || {info: "Info fehlt", q: "Frage?", a: ["A","B"], c: 0};
+            document.getElementById('stepCounter').innerText = `Station ${currentIndex+1}/10`;
             document.getElementById('info-text').innerText = step.info;
+            document.getElementById('question-text').innerText = step.q;
+            const mediaCont = document.getElementById('step-media');
+            const img = document.getElementById('missionImg');
+            const errorBox = document.getElementById('image-error-box');
+            
+            if(step.media) { 
+                mediaCont.classList.remove('hidden'); 
+                img.src = `assets/${step.media}`; 
+                img.style.display="block"; 
+                errorBox.style.display="none";
+            } else { 
+                mediaCont.classList.add('hidden'); 
+            }
+            
+            const optDiv = document.getElementById('question-options');
+            optDiv.innerHTML = "";
+            step.a.forEach((ans, i) => {
+                const b = document.createElement('button');
+                b.className = "option-btn"; b.innerText = ans;
+                b.onclick = () => {
+                    const options = document.querySelectorAll('.option-btn');
+                    if(i === step.c) {
+                        b.classList.add('correct');
+                        options.forEach(o => o.disabled = true);
+                        if(!missionProgress[currentType].includes(currentIndex)) missionProgress[currentType].push(currentIndex);
+                        document.getElementById('next-btn').classList.remove('hidden');
+                        updateUI();
+                    } else { 
+                        b.classList.add('wrong'); 
+                    }
+                };
+                optDiv.appendChild(b);
+            });
             document.getElementById('step-info').classList.remove('hidden');
             document.getElementById('step-question').classList.add('hidden');
             document.getElementById('next-btn').classList.add('hidden');
             document.getElementById('feedback-msg').style.display = 'none';
-
-            const optDiv = document.getElementById('question-options');
-            optDiv.innerHTML = "";
-            document.getElementById('question-text').innerText = step.q;
-            step.a.forEach((ans, i) => {
-                const btn = document.createElement('button');
-                btn.className = "option-btn";
-                btn.innerText = ans;
-                btn.onclick = () => checkAnswer(i, btn);
-                optDiv.appendChild(btn);
-            });
-            lucide.createIcons();
         }
 
-        function showQuestion() {
-            document.getElementById('step-info').classList.add('hidden');
-            document.getElementById('step-question').classList.remove('hidden');
-        }
-
-        function checkAnswer(idx, btn) {
-            const step = missionData[currentMissionType][currentStepIndex];
-            const feedback = document.getElementById('feedback-msg');
-            const options = document.querySelectorAll('.option-btn');
-            feedback.style.display = 'block';
-
-            if (idx === step.c) {
-                btn.classList.add('correct');
-                options.forEach(o => o.disabled = true);
-                feedback.innerText = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
-                feedback.style.color = "var(--success)";
-                document.getElementById('next-btn').classList.remove('hidden');
-                
-                if (!missionProgress[currentMissionType].includes(currentStepIndex)) {
-                    missionProgress[currentMissionType].push(currentStepIndex);
-                }
-                updateUI();
-            } else {
-                btn.classList.add('wrong');
-                feedback.innerText = retryFeedback[Math.floor(Math.random() * retryFeedback.length)];
-                feedback.style.color = "var(--error)";
-                setTimeout(() => { btn.classList.remove('wrong'); feedback.style.display = 'none'; }, 1500);
-            }
-        }
-
-        function nextStep() {
-            currentStepIndex++;
-            if (currentStepIndex < 10) loadStep(); else showFinish();
-        }
-
+        function showQuestion() { document.getElementById('step-info').classList.add('hidden'); document.getElementById('step-question').classList.remove('hidden'); }
+        function nextStep() { currentIndex++; if(currentIndex < 10) loadStep(); else showFinish(); }
+        
         function showFinish() {
             showView('view-finish');
             document.getElementById('finish-congrats').innerText = `Super, ${detectiveName}!`;
-            document.getElementById('finish-text').innerText = `Du hast den Fall "${getTitle(currentMissionType)}" erfolgreich gelöst!`;
-            updateUI();
-        }
-
-        function printCertificate() {
-            const timeStr = document.getElementById('timer-display').innerText;
-            const timeRankStr = getTimeRank();
-            
-            document.getElementById('cert-display-name').innerText = detectiveName;
-            document.getElementById('cert-display-rank').innerText = document.getElementById('status-rank').innerText;
-            document.getElementById('cert-display-time-rank').innerText = `${timeRankStr} (Zeit: ${timeStr})`;
-            
-            const date = new Date().toLocaleDateString('de-DE');
-            document.getElementById('cert-display-date').innerText = date;
-            
-            window.print();
+            document.getElementById('finish-text').innerText = `Du hast alle Aufgaben dieser Mission erfolgreich gemeistert.`;
         }
 
         function updateUI() {
-            let totalSolved = 0;
-            ['img', 'txt', 'fak', 'dat'].forEach(t => {
-                const solvedCount = missionProgress[t].length;
-                totalSolved += solvedCount;
-                if(document.getElementById(`prog-${t}-text`)) document.getElementById(`prog-${t}-text`).innerText = `${solvedCount}/10`;
-                if(document.getElementById(`prog-${t}-fill`)) document.getElementById(`prog-${t}-fill`).style.width = `${solvedCount * 10}%`;
+            let total = 0;
+            ['img','txt','fak','dat'].forEach(t => {
+                const count = missionProgress[t].length;
+                total += count;
+                const txtEl = document.getElementById(`prog-${t}-text`);
+                if(txtEl) txtEl.innerText = `${count}/10`;
+                const fillEl = document.getElementById(`prog-${t}-fill`);
+                if(fillEl) fillEl.style.width = `${count*10}%`;
             });
-
-            const percent = Math.round((totalSolved / 40) * 100);
-            document.getElementById('total-percent').innerText = `${percent}%`;
-            document.getElementById('total-progress-fill').style.width = `${percent}%`;
-
-            const rank = percent < 30 ? "Junior-Ermittler" : percent < 70 ? "Profi-Detektiv" : "Meister-Ermittler";
-            document.getElementById('status-rank').innerText = rank;
-            
-            updateSidebarNav();
+            const perc = Math.round((total/40)*100);
+            document.getElementById('total-percent').innerText = perc + "%";
+            document.getElementById('total-progress-fill').style.width = perc + "%";
+            document.getElementById('status-rank').innerText = perc < 30 ? "Junior-Ermittler" : perc < 70 ? "Profi-Detektiv" : "Meister-Ermittler";
         }
 
-        function updateSidebarNav() {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const activeView = document.querySelector('.view.active');
-            if(!activeView) return;
-            const currentView = activeView.id;
-            if (currentView === 'view-hub') document.getElementById('nav-hub').classList.add('active');
-            else if (currentMissionType) {
-                const nav = document.getElementById(`nav-${currentMissionType}`);
-                if (nav) nav.classList.add('active');
-            }
+        function printCertificate() {
+            document.getElementById('cert-display-name').innerText = detectiveName;
+            document.getElementById('cert-display-rank').innerText = document.getElementById('status-rank').innerText;
+            document.getElementById('cert-display-time-rank').innerText = getTimeRank();
+            document.getElementById('cert-display-date').innerText = new Date().toLocaleDateString('de-DE');
+            window.print();
         }
 
-        function getTitle(type) {
-            if (type === 'img') return "Bild-Labor";
-            if (type === 'txt') return "Text-Check";
-            if (type === 'fak') return "Fakten-Radar";
-            return "Sicherheit";
-        }
-
-        function showView(viewId) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            updateSidebarNav();
-            window.scrollTo(0,0);
-        }
-
-        function goToHub() { currentMissionType = ""; showView('view-hub'); }
-        function backToMenu() { openMissionMenu(currentMissionType); }
+        function handleImageError() { document.getElementById('missionImg').style.display="none"; document.getElementById('image-error-box').style.display="flex"; }
+        function toggleZoom() { const o = document.getElementById('zoom-overlay'); document.getElementById('zoomed-img').src = document.getElementById('missionImg').src; o.classList.toggle('active'); }
         function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+        function toggleLeftSidebar() { document.getElementById('sidebar-left').classList.toggle('open'); }
+        function toggleRightSidebar() { document.getElementById('sidebar-right').classList.toggle('open'); }
+        function goToHub() { currentType = ""; showView('view-hub'); }
+        function backToMenu() { openMissionMenu(currentType); }
+        function closeSidebars() { document.querySelectorAll('aside').forEach(a => a.classList.remove('open')); }
     </script>
 </body>
 </html>
