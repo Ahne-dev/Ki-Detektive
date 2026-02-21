@@ -48,14 +48,15 @@
 
         /* Optimierte Druck-Stile für das Zertifikat */
         @media print {
-            body { background: white !important; }
-            .app-wrapper, .sidebar-toggle, .overlay-bg, .zoom-overlay, #main-header, .toast { 
+            body { background: white !important; margin: 0; padding: 0; }
+            .app-wrapper, .sidebar-toggle, .overlay-bg, .zoom-overlay, #main-header, .toast, aside { 
                 display: none !important; 
             }
             
             #certificate-area {
                 display: block !important;
-                position: relative;
+                position: absolute;
+                top: 0; left: 0;
                 width: 210mm;
                 height: 297mm;
                 padding: 15mm;
@@ -362,6 +363,15 @@
 
         /* Fake-Input zum Kopieren */
         #copy-helper { position: absolute; left: -9999px; top: 0; }
+
+        .overlay-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 90;
+        }
+        .overlay-bg.active { display: block; }
     </style>
 </head>
 <body class="dark-mode">
@@ -546,7 +556,7 @@
         let timerInterval = null;
         let missionProgress = { img: [], txt: [], fak: [], dat: [] };
 
-        const randomNames = ["Daten-Fuchs", "Code-Eule", "Pixel-Luchs", "Cyber-Dachs"];
+        const randomNames = ["Daten-Fuchs", "Code-Eule", "Pixel-Luchs", "Cyber-Dachs", "Info-Panther", "Spur-Wolf"];
         const missionData = {
             img: [
                 { short: "Finger", media: "ki-hand.png", info: "KIs zeichnen oft 6 Finger.", q: "Wie viele Finger hat ein Mensch normal?", a: ["4 Finger", "5 Finger", "6 Finger"], c: 1 },
@@ -598,26 +608,56 @@
             ]
         };
 
-        // Fortsetzen-Logik beim Laden
+        // Hilfsfunktion: Bitmaske erstellen (spart extrem viel Platz in der URL)
+        function packProgress() {
+            let packed = {};
+            for (let key in missionProgress) {
+                let mask = 0;
+                missionProgress[key].forEach(idx => mask |= (1 << idx));
+                packed[key] = mask;
+            }
+            return btoa(JSON.stringify(packed));
+        }
+
+        // Hilfsfunktion: Bitmaske entpacken
+        function unpackProgress(str) {
+            try {
+                let packed = JSON.parse(atob(str));
+                let unpacked = { img: [], txt: [], fak: [], dat: [] };
+                for (let key in packed) {
+                    for (let i = 0; i < 10; i++) {
+                        if ((packed[key] >> i) & 1) unpacked[key].push(i);
+                    }
+                }
+                return unpacked;
+            } catch(e) { return null; }
+        }
+
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
-            if (params.has('name') && params.has('prog')) {
-                detectiveName = params.get('name');
-                totalSeconds = parseInt(params.get('time')) || 0;
-                try {
-                    const decodedProgress = JSON.parse(atob(params.get('prog')));
-                    missionProgress = decodedProgress;
-                    startMission(false); // Automatischer Start
-                } catch(e) {
-                    console.error("Fehler beim Laden des Status");
+            if (params.has('name') && params.has('p')) {
+                detectiveName = decodeURIComponent(params.get('name'));
+                totalSeconds = parseInt(params.get('t')) || 0;
+                const prog = unpackProgress(params.get('p'));
+                if (prog) {
+                    missionProgress = prog;
+                    startMission(false, true); // Automatischer Start bei Resume
                 }
             }
         };
 
-        function startMission(isRandom) {
-            if (!missionProgress.img.length && !missionProgress.txt.length) { // Nur wenn nicht gerade geladen wurde
-                detectiveName = isRandom ? randomNames[Math.floor(Math.random()*randomNames.length)] : document.getElementById('nameInput').value || "Detektiv";
+        function startMission(isRandom, isResume = false) {
+            const inputVal = document.getElementById('nameInput').value.trim();
+            
+            // Name nur setzen, wenn wir nicht gerade aus einer URL laden
+            if (!isResume) {
+                if (isRandom) {
+                    detectiveName = randomNames[Math.floor(Math.random()*randomNames.length)];
+                } else {
+                    detectiveName = inputVal || "Detektiv";
+                }
             }
+
             document.getElementById('status-name').innerText = detectiveName;
             document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('btn-toggle-left').classList.remove('hidden');
@@ -658,7 +698,8 @@
 
         function openMissionMenu(type) {
             currentType = type;
-            document.getElementById('menuTitle').innerText = type === 'img' ? 'Bild-Labor' : type === 'txt' ? 'Text-Check' : type === 'fak' ? 'Fakten-Radar' : 'Sicherheit';
+            const titles = {img: 'Bild-Labor', txt: 'Text-Check', fak: 'Fakten-Radar', dat: 'Sicherheit'};
+            document.getElementById('menuTitle').innerText = titles[type] || 'Mission';
             const grid = document.getElementById('missionGrid');
             grid.innerHTML = "";
             const data = missionData[type] || Array(10).fill({short: "Station"});
@@ -700,7 +741,9 @@
                     if(i === step.c) {
                         b.classList.add('correct');
                         options.forEach(o => o.disabled = true);
-                        if(!missionProgress[currentType].includes(currentIndex)) missionProgress[currentType].push(currentIndex);
+                        if(!missionProgress[currentType].includes(currentIndex)) {
+                            missionProgress[currentType].push(currentIndex);
+                        }
                         document.getElementById('next-btn').classList.remove('hidden');
                         updateUI();
                     } else { 
@@ -743,14 +786,17 @@
         }
 
         function getResumeLink() {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const progressData = btoa(JSON.stringify(missionProgress));
-            return `${baseUrl}?name=${encodeURIComponent(detectiveName)}&time=${totalSeconds}&prog=${progressData}`;
+            // Sicherere URL-Basis ermitteln
+            const url = new URL(window.location.href);
+            const baseUrl = url.origin + url.pathname;
+            const p = packProgress();
+            return `${baseUrl}?name=${encodeURIComponent(detectiveName)}&t=${totalSeconds}&p=${p}`;
         }
 
         function updateSaveLinks() {
             const link = getResumeLink();
             const qrContainer = document.getElementById('qr-display');
+            // QR Server ist robuster bei encodeten URLs
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
             qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code">`;
         }
@@ -778,7 +824,7 @@
         function toggleZoom() { 
             const o = document.getElementById('zoom-overlay'); 
             const missionImg = document.getElementById('missionImg');
-            if (missionImg.style.display !== "none") {
+            if (missionImg && missionImg.style.display !== "none") {
                 document.getElementById('zoomed-img').src = missionImg.src; 
                 o.classList.toggle('active'); 
             }
@@ -788,7 +834,7 @@
         function toggleRightSidebar() { document.getElementById('sidebar-right').classList.toggle('open'); }
         function goToHub() { currentType = ""; showView('view-hub'); }
         function backToMenu() { openMissionMenu(currentType); }
-        function closeSidebars() { document.querySelectorAll('aside').forEach(a => a.classList.remove('open')); }
+        function closeSidebars() { document.querySelectorAll('aside, .overlay-bg').forEach(a => a.classList.remove('open', 'active')); }
     </script>
 </body>
 </html>
