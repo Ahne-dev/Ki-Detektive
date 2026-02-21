@@ -559,16 +559,16 @@
         const randomNames = ["Daten-Fuchs", "Code-Eule", "Pixel-Luchs", "Cyber-Dachs", "Info-Panther", "Spur-Wolf"];
         const missionData = {
             img: [
-                { short: "Finger", media: "ki-hand.png", info: "KIs zeichnen oft 6 Finger.", q: "Wie viele Finger hat ein Mensch normal?", a: ["4 Finger", "5 Finger", "6 Finger"], c: 1 },
-                { short: "Brille", media: "ki-brille.png", info: "Brillenrahmen verschmelzen oft mit Haaren.", q: "Was ist hier der Fehler?", a: ["Schief", "Verschmilzt mit Haaren", "Keine Gläser"], c: 1 },
-                { short: "Hintergrund", media: "ki-hintergrund.png", info: "Linien im Hintergrund wirken oft verbogen.", q: "Worauf achtest du?", a: ["Auf Schatten", "Auf gerade Linien", "Auf die Farben"], c: 1 },
-                { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft wie glattes Plastik.", q: "Wie sieht die Haut aus?", a: ["Zu glatt", "Zu faltig", "Dreckig"], c: 0 },
-                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe sehen oft unterschiedlich aus.", q: "Worauf achtest du?", a: ["Auf die Ohren", "Auf die Nase", "Auf den Mund"], c: 0 },
-                { short: "Text", media: "ki-text.png", info: "Schrift in KI-Bildern ist oft unleserlich.", q: "Kann man den Text lesen?", a: ["Ja", "Oft nicht", "Nur nachts"], c: 1 },
-                { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen.", q: "Was stimmt nicht?", a: ["Das Licht", "Das Wetter", "Die Kleidung"], c: 0 },
-                { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne.", q: "Wie viele Zähne?", a: ["Zu viele", "Zu wenige", "Gar keine"], c: 0 },
-                { short: "Struktur", media: "ki-struktur.png", info: "Muster wiederholen sich oft unnatürlich.", q: "Was stimmt hier nicht?", a: ["Das Muster", "Die Größe", "Der Name"], c: 0 },
-                { short: "Anatomie", media: "ki-anatomie.png", info: "Gliedmaßen sind oft an falschen Stellen.", q: "Was passt nicht?", a: ["Körperteile", "Die Kleidung", "Das Gesicht"], c: 0 }
+                { short: "Finger", media: "ki-hand.png", info: "KIs zeichnen oft zu viele Finger oder deformierte Hände.", q: "Wie viele Finger hat ein Mensch normalerweise an einer Hand?", a: ["4 Finger", "5 Finger", "6 Finger"], c: 1 },
+                { short: "Brille", media: "ki-brille.png", info: "Brillenrahmen verschmelzen oft unnatürlich mit der Haut oder den Haaren.", q: "Was ist hier bei der Brille oft der Fehler?", a: ["Sie ist schief", "Sie verschmilzt mit den Haaren", "Sie hat keine Gläser"], c: 1 },
+                { short: "Hintergrund", media: "ki-hintergrund.png", info: "Linien im Hintergrund (Fenster, Zäune) wirken in KI-Bildern oft verbogen.", q: "Worauf solltest du im Hintergrund besonders achten?", a: ["Auf Schatten", "Auf gerade Linien", "Auf die Farben"], c: 1 },
+                { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft übernatürlich glatt, fast wie Plastik oder Porzellan.", q: "Wie beschreiben Experten oft die Haut in KI-Porträts?", a: ["Zu glatt und künstlich", "Viel zu faltig", "Immer dreckig"], c: 0 },
+                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links und rechts oft völlig unterschiedlich aus.", q: "Was stimmt bei KI-generierten Menschen oft mit den Ohren nicht?", a: ["Sie fehlen ganz", "Sie sind asymmetrisch (ungleich)", "Sie sind immer grün"], c: 1 },
+                { short: "Schilder", media: "ki-schild.png", info: "Texte auf Schildern im Hintergrund sind für KIs schwer. Oft entstehen Fantasie-Buchstaben.", q: "Was fällt dir bei Texten auf KI-Bildern meistens auf?", a: ["Man kann sie perfekt lesen", "Es ist meistens Buchstabensalat", "Es ist immer auf Deutsch"], c: 1 },
+                { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen. Schatten fallen in verschiedene Richtungen.", q: "Was ist bei der Beleuchtung oft unlogisch?", a: ["Die Schattenrichtung passt nicht", "Es gibt keinen Schatten", "Der Schatten ist bunt"], c: 0 },
+                { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne oder die Zähne verschmelzen miteinander.", q: "Was ist bei diesem Lächeln verdächtig?", a: ["Zu viele Zähne", "Keine Zähne", "Blaue Zähne"], c: 0 },
+                { short: "Haare", media: "ki-haare.png", info: "Haare sehen bei KIs oft wie gemalt aus oder wachsen an unmöglichen Stellen aus der Kleidung.", q: "Worauf achtest du bei der Frisur?", a: ["Ob sie glänzt", "Ob die Haare unnatürlich mit Kleidung verschmelzen", "Ob sie kurz sind"], c: 1 },
+                { short: "Kleidung", media: "ki-kleidung.png", info: "Muster auf der Kleidung oder Kragen verschwinden plötzlich oder wiederholen sich falsch.", q: "Was passiert oft mit Mustern auf KI-Kleidung?", a: ["Sie verschwimmen oder sind unlogisch", "Sie leuchten im Dunkeln", "Sie sind immer gestreift"], c: 0 }
             ],
             txt: [
                 { short: "Höflichkeit", info: "KIs sind extrem höflich.", q: "Wie schreibt eine KI?", a: ["Frech", "Sehr höflich", "Wütend"], c: 1 },
@@ -585,7 +585,7 @@
             fak: [
                 { short: "Lügen", info: "KIs erfinden manchmal Fakten (Halluzination).", q: "Sagen sie immer die Wahrheit?", a: ["Ja", "Nein, sie flunkern", "Nur im Winter"], c: 1 },
                 { short: "Quellen", info: "KIs können keine echten Quellen nennen.", q: "Haben sie Quellen?", a: ["Ja", "Oft erfunden", "Immer"], c: 1 },
-                { short: "Aktualität", info: "KIs wissen oft nicht, was HEUTE passiert ist.", q: "Was weiß eine KI vielleicht nicht?", a: ["Nachrichten von heute.", "Was vor 100 Jahren war.", "Dass es Drachen nicht gibt."], c: 0 },
+                { short: "Aktualität", info: "KIs wissen oft nicht von heute.", q: "Wissen sie alles?", a: ["Ja", "Nicht das Aktuelle", "Nur Sport"], c: 1 },
                 { short: "Logik", info: "Einfache Logikrätsel schlagen oft fehl.", q: "Sind sie logisch?", a: ["Immer", "Nicht immer", "Gar nicht"], c: 1 },
                 { short: "Mathe", info: "KIs machen oft Fehler beim Rechnen.", q: "Können sie rechnen?", a: ["Perfekt", "Oft fehlerhaft", "Nur Plus"], c: 1 },
                 { short: "Experimente", info: "KIs können nicht experimentieren.", q: "Probieren sie Dinge aus?", a: ["Ja", "Nein", "Oft"], c: 1 },
@@ -608,7 +608,7 @@
             ]
         };
 
-        // Hilfsfunktion: Bitmaske erstellen (spart extrem viel Platz in der URL)
+        // Bitmaske für effizienten URL-Speicher
         function packProgress() {
             let packed = {};
             for (let key in missionProgress) {
@@ -619,7 +619,6 @@
             return btoa(JSON.stringify(packed));
         }
 
-        // Hilfsfunktion: Bitmaske entpacken
         function unpackProgress(str) {
             try {
                 let packed = JSON.parse(atob(str));
@@ -641,15 +640,13 @@
                 const prog = unpackProgress(params.get('p'));
                 if (prog) {
                     missionProgress = prog;
-                    startMission(false, true); // Automatischer Start bei Resume
+                    startMission(false, true);
                 }
             }
         };
 
         function startMission(isRandom, isResume = false) {
             const inputVal = document.getElementById('nameInput').value.trim();
-            
-            // Name nur setzen, wenn wir nicht gerade aus einer URL laden
             if (!isResume) {
                 if (isRandom) {
                     detectiveName = randomNames[Math.floor(Math.random()*randomNames.length)];
@@ -657,7 +654,6 @@
                     detectiveName = inputVal || "Detektiv";
                 }
             }
-
             document.getElementById('status-name').innerText = detectiveName;
             document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('btn-toggle-left').classList.remove('hidden');
@@ -786,7 +782,6 @@
         }
 
         function getResumeLink() {
-            // Sicherere URL-Basis ermitteln
             const url = new URL(window.location.href);
             const baseUrl = url.origin + url.pathname;
             const p = packProgress();
@@ -796,7 +791,6 @@
         function updateSaveLinks() {
             const link = getResumeLink();
             const qrContainer = document.getElementById('qr-display');
-            // QR Server ist robuster bei encodeten URLs
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`;
             qrContainer.innerHTML = `<img src="${qrUrl}" alt="QR Code">`;
         }
