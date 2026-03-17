@@ -687,7 +687,7 @@
         let totalSeconds = 0;
         let timerInterval = null;
         let missionProgress = { img: [], txt: [], fak: [], dat: [] };
-        let missionScores = { img: 0, txt: 0, fak: 0, dat: 0 }; // Korrekte Antworten zählen
+        let missionScores = { img: 0, txt: 0, fak: 0, dat: 0 }; 
 
         const randomNames = ["Daten-Fuchs", "Code-Eule", "Pixel-Luchs", "Cyber-Dachs", "Info-Panther", "Spur-Wolf"];
         const missionData = {
@@ -698,7 +698,7 @@
                 { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft übernatürlich glatt, fast wie Plastik oder Porzellan.", q: "Wie sieht die Haut in vielen KI-Porträts aus?", a: ["Unnatürlich glatt, wie aus Plastik", "Viel zu faltig und alt", "Immer voller Sommersprossen"], c: 0, h: "Echte Haut hat Poren und kleine Unebenheiten. KI-Haut wirkt oft 'zu perfekt'." },
                 { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links und rechts oft völlig unterschiedlich aus.", q: "Was ist bei den Ohren von KI-Menschen oft verdächtig?", a: ["Sie haben gar keine Ohren", "Sie sind asymmetrisch (links und rechts völlig verschieden)", "Sie sind immer unter Haaren versteckt"], c: 1, h: "Vergleiche das linke Ohr mit dem rechten. Sind die Ohrringe gleich?" },
                 { short: "Schilder", media: "ki-schild.png", info: "Texte auf der Hintergrunde sind für KIs schwer. Oft entstehen Fantasie-Buchstaben.", q: "Warum entlarven Schilder im Hintergrund oft ein KI-Bild?", a: ["Die Schilder sind immer blau", "Der Text besteht oft aus unleserlichem Buchstabensalat", "Es fehlen die Preise"], c: 1, h: "Versuche, ein einzelnes Wort auf dem Schild im Hintergrund zu lesen." },
-                { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen. Schatten fallen in verschiedene Richtungen.", q: "Welcher Fehler tritt bei KI-Schatten häufig auf?", a: ["Die Schattenrichtung passt nicht zur Lichtquelle", "Es gibt im Bild niemals Schatten", "Der Schatten ist bunter als das Objekt"], c: 0, h: "Überlege: Wenn die Sonne oben links ist, wohin müsste der Schatten fallen?" },
+                { short: "Schatten", media: "ki-schatten.png", info: "KIs machen oft Logik-Fehler beim Licht. Manchmal gibt es Schatten an Stellen, wo eigentlich gar keine sein sollten.", q: "Was ist ein typischer Fehler bei Schatten in KI-Bildern?", a: ["Es erscheinen Schatten an völlig unlogischen Stellen", "Schatten sind immer kreisrund", "Die Schatten leuchten im Dunkeln"], c: 0, h: "Schau genau hin: Gibt es Schatten, obwohl weit und breit kein Gegenstand im Weg ist?" },
                 { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne oder die Zähne verschmelzen miteinander.", q: "Was macht ein KI-Lächeln oft 'unmenschlich'?", a: ["Die KI zeichnet oft zu viele oder verschmolzene Zähne", "Die Zähne fehlen komplett", "Die Zähne sind quadratisch"], c: 0, h: "Schau dir das Lächeln ganz nah an. Zähle die Zähne oder achte auf Lücken." },
                 { short: "Haare", media: "ki-haare.png", info: "Haare sehen bei KIs oft wie gemalt aus oder wachsen unnatürlich aus der Kleidung.", q: "Was ist bei KI-Frisuren oft ein Zeichen für eine Fälschung?", a: ["Die Haare glänzen zu stark", "Einzelne Haare wachsen unnatürlich aus der Haut oder Kleidung", "Die Haare sind immer blond"], c: 1, h: "Verfolge einzelne Haarsträhnen. Wachsen sie logisch aus der Kopfhaut?" },
                 { short: "Kleidung", media: "ki-kleidung.png", info: "Muster auf der Kleidung oder Kragen verschwinden plötzlich oder wiederholen sich falsch.", q: "Was ist bei KI-generierter Kleidung oft fehlerhaft?", a: ["Die Muster verschwimmen oder enden unlogisch", "Die Kleidung ist immer zu sauber", "Es gibt keine Knöpfe"], c: 0, h: "Achte auf Karos oder Streifen. Gehen sie an den Nähten logisch weiter?" }
@@ -748,7 +748,6 @@
                 missionProgress[key].forEach(idx => mask |= (1 << idx));
                 packed[key] = mask;
             }
-            // Wir packen auch die Scores mit ein
             const scores = missionScores;
             return btoa(JSON.stringify({p: packed, s: scores}));
         }
@@ -929,7 +928,6 @@
                 }
             });
 
-            // Score erhöhen wenn korrekt
             if(selectedIndex === step.c) {
                 missionScores[currentType]++;
             }
@@ -960,7 +958,6 @@
             if(currentIndex < 10) {
                 loadStep(); 
             } else {
-                // Mission beendet (10 Stationen fertig)
                 showMissionSummary();
             }
         }
