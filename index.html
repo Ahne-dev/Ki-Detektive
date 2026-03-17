@@ -17,6 +17,7 @@
             --neon-accent: #22d3ee;
             --success: #10b981;
             --error: #ef4444;
+            --warning: #f59e0b;
             --border-color: #e2e8e0;
             --sidebar-width: 260px;
         }
@@ -49,7 +50,7 @@
         /* Optimierte Druck-Stile für das Zertifikat */
         @media print {
             body { background: white !important; margin: 0; padding: 0; }
-            .app-wrapper, .sidebar-toggle, .overlay-bg, .zoom-overlay, #main-header, .toast, aside { 
+            .app-wrapper, .sidebar-toggle, .overlay-bg, .zoom-overlay, #main-header, .toast, aside, .hint-area { 
                 display: none !important; 
             }
             
@@ -323,6 +324,20 @@
 
         .feedback-area { margin-top: 20px; padding: 15px; border-radius: 12px; font-weight: bold; display: none; }
         .info-step { background: rgba(37, 99, 235, 0.1); border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 0 16px 16px 0; margin-bottom: 20px; }
+        
+        /* Hint Styling */
+        .hint-area {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px dashed var(--warning);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: none;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease;
+        }
+
         .hidden { display: none; }
 
         /* QR-Code & Save Section */
@@ -499,8 +514,17 @@
                     </div>
                     <div id="step-question" class="question-step hidden">
                         <h3 id="question-text"></h3>
+                        <div id="hint-msg" class="hint-area">
+                            <strong>🕵️ Detektiv-Tipp:</strong> <span id="hint-text"></span>
+                        </div>
                         <div id="question-options"></div>
                         <div id="feedback-msg" class="feedback-area"></div>
+                        
+                        <!-- Hinweis-Button jetzt hier im Fragenbereich -->
+                        <button id="hint-btn" class="btn btn-ghost" onclick="showHint()" style="margin-top: 10px; font-size: 0.9rem; width: 100%;">
+                            <i data-lucide="lightbulb"></i> Brauchst du einen Hinweis?
+                        </button>
+
                         <button id="next-btn" class="btn hidden" onclick="nextStep()" style="width: 100%;">Weiter <i data-lucide="arrow-right"></i></button>
                     </div>
                 </div>
@@ -559,52 +583,52 @@
         const randomNames = ["Daten-Fuchs", "Code-Eule", "Pixel-Luchs", "Cyber-Dachs", "Info-Panther", "Spur-Wolf"];
         const missionData = {
             img: [
-                { short: "Finger", media: "ki-hand.png", info: "KIs zeichnen oft zu viele Finger oder deformierte Hände.", q: "Wie viele Finger hat ein Mensch normalerweise an einer Hand?", a: ["4 Finger", "5 Finger", "6 Finger"], c: 1 },
-                { short: "Brille", media: "ki-brille.png", info: "Brillenrahmen verschmelzen oft unnatürlich mit der Haut oder den Haaren.", q: "Was ist hier bei der Brille oft der Fehler?", a: ["Sie ist schief", "Sie verschmilzt mit den Haaren", "Sie hat keine Gläser"], c: 1 },
-                { short: "Hintergrund", media: "ki-hintergrund.png", info: "Linien im Hintergrund (Fenster, Zäune) wirken in KI-Bildern oft verbogen.", q: "Worauf solltest du im Hintergrund besonders achten?", a: ["Auf Schatten", "Auf gerade Linien", "Auf die Farben"], c: 1 },
-                { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft übernatürlich glatt, fast wie Plastik oder Porzellan.", q: "Wie beschreiben Experten oft die Haut in KI-Porträts?", a: ["Zu glatt und künstlich", "Viel zu faltig", "Immer dreckig"], c: 0 },
-                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links und rechts oft völlig unterschiedlich aus.", q: "Was stimmt bei KI-generierten Menschen oft mit den Ohren nicht?", a: ["Sie fehlen ganz", "Sie sind asymmetrisch (ungleich)", "Sie sind immer grün"], c: 1 },
-                { short: "Schilder", media: "ki-schild.png", info: "Texte auf Schildern im Hintergrund sind für KIs schwer. Oft entstehen Fantasie-Buchstaben.", q: "Was fällt dir bei Texten auf KI-Bildern meistens auf?", a: ["Man kann sie perfekt lesen", "Es ist meistens Buchstabensalat", "Es ist immer auf Deutsch"], c: 1 },
-                { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen. Schatten fallen in verschiedene Richtungen.", q: "Was ist bei der Beleuchtung oft unlogisch?", a: ["Die Schattenrichtung passt nicht", "Es gibt keinen Schatten", "Der Schatten ist bunt"], c: 0 },
-                { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne oder die Zähne verschmelzen miteinander.", q: "Was ist bei diesem Lächeln verdächtig?", a: ["Zu viele Zähne", "Keine Zähne", "Blaue Zähne"], c: 0 },
-                { short: "Haare", media: "ki-haare.png", info: "Haare sehen bei KIs oft wie gemalt aus oder wachsen an unmöglichen Stellen aus der Kleidung.", q: "Worauf achtest du bei der Frisur?", a: ["Ob sie glänzt", "Ob die Haare unnatürlich mit Kleidung verschmelzen", "Ob sie kurz sind"], c: 1 },
-                { short: "Kleidung", media: "ki-kleidung.png", info: "Muster auf der Kleidung oder Kragen verschwinden plötzlich oder wiederholen sich falsch.", q: "Was passiert oft mit Mustern auf KI-Kleidung?", a: ["Sie verschwimmen oder sind unlogisch", "Sie leuchten im Dunkeln", "Sie sind immer gestreift"], c: 0 }
+                { short: "Finger", media: "ki-hand.png", info: "KIs zeichnen oft zu viele Finger oder deformierte Hände.", q: "Worauf achtest du bei Händen, um eine KI zu entlarven?", a: ["Ob sie Handschuhe tragen", "Ob die Anzahl der Finger (genau 5) stimmt", "Ob sie Fingernägel haben"], c: 1, h: "Zähle die Finger an einer Hand ganz genau nach." },
+                { short: "Brille", media: "ki-brille.png", info: "Brillenrahmen verschmelzen oft unnatürlich mit der Haut oder den Haaren.", q: "Was ist bei KI-Brillen ein typischer Bildfehler?", a: ["Die Gläser sind immer dunkel", "Der Rahmen verschmilzt mit den Haaren oder dem Gesicht", "Die Brille ist immer zu groß"], c: 1, h: "Schau dir den Übergang zwischen Brillenbügel und Ohren oder Haaren an." },
+                { short: "Hintergrund", media: "ki-hintergrund.png", info: "Linien im Hintergrund (Fenster, Zäune) wirken in KI-Bildern oft verbogen.", q: "Welches Detail im Hintergrund verrät oft eine KI?", a: ["Die Farbe der Blumen", "Verbogene oder unlogische Linien an Gebäuden", "Dass die Sonne scheint"], c: 1, h: "Such nach geraden Kanten von Gebäuden – wirken sie im Hintergrund schief?" },
+                { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft übernatürlich glatt, fast wie Plastik oder Porzellan.", q: "Wie sieht die Haut in vielen KI-Porträts aus?", a: ["Unnatürlich glatt, wie aus Plastik", "Viel zu faltig and alt", "Immer voller Sommersprossen"], c: 0, h: "Echte Haut hat Poren und kleine Unebenheiten. KI-Haut wirkt oft 'zu perfekt'." },
+                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links und rechts oft völlig unterschiedlich aus.", q: "Was ist bei den Ohren von KI-Menschen oft verdächtig?", a: ["Sie haben gar keine Ohren", "Sie sind asymmetrisch (links und rechts völlig verschieden)", "Sie sind immer unter Haaren versteckt"], c: 1, h: "Vergleiche das linke Ohr mit dem rechten. Sind die Ohrringe gleich?" },
+                { short: "Schilder", media: "ki-schild.png", info: "Texte auf Schildern im Hintergrund sind für KIs schwer. Oft entstehen Fantasie-Buchstaben.", q: "Warum entlarven Schilder im Hintergrund oft ein KI-Bild?", a: ["Die Schilder sind immer blau", "Der Text besteht oft aus unleserlichem Buchstabensalat", "Es fehlen die Preise"], c: 1, h: "Versuche, ein einzelnes Wort auf dem Schild im Hintergrund zu lesen." },
+                { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen. Schatten fallen in verschiedene Richtungen.", q: "Welcher Fehler tritt bei KI-Schatten häufig auf?", a: ["Die Schattenrichtung passt nicht zur Lichtquelle", "Es gibt im Bild niemals Schatten", "Der Schatten ist bunter als das Objekt"], c: 0, h: "Überlege: Wenn die Sonne oben links ist, wohin müsste der Schatten fallen?" },
+                { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne oder die Zähne verschmelzen miteinander.", q: "Was macht ein KI-Lächeln oft 'unmenschlich'?", a: ["Die KI zeichnet oft zu viele oder verschmolzene Zähne", "Die Zähne fehlen komplett", "Die Zähne sind quadratisch"], c: 0, h: "Schau dir das Lächeln ganz nah an. Zähle die Zähne oder achte auf Lücken." },
+                { short: "Haare", media: "ki-haare.png", info: "Haare sehen bei KIs oft wie gemalt aus oder wachsen unnatürlich aus der Kleidung.", q: "Was ist bei KI-Frisuren oft ein Zeichen für eine Fälschung?", a: ["Die Haare glänzen zu stark", "Einzelne Haare wachsen unnatürlich aus der Haut oder Kleidung", "Die Haare sind immer blond"], c: 1, h: "Verfolge einzelne Haarsträhnen. Wachsen sie logisch aus der Kopfhaut?" },
+                { short: "Kleidung", media: "ki-kleidung.png", info: "Muster auf der Kleidung oder Kragen verschwinden plötzlich oder wiederholen sich falsch.", q: "Was ist bei KI-generierter Kleidung oft fehlerhaft?", a: ["Die Muster verschwimmen oder enden unlogisch", "Die Kleidung ist immer zu sauber", "Es gibt keine Knöpfe"], c: 0, h: "Achte auf Karos oder Streifen. Gehen sie an den Nähten logisch weiter?" }
             ],
             txt: [
-                { short: "Höflichkeit", info: "KIs sind extrem höflich.", q: "Wie schreibt eine KI?", a: ["Frech", "Sehr höflich", "Wütend"], c: 1 },
-                { short: "Wortwahl", info: "KIs benutzen oft komplizierte Wörter.", q: "Welche Wörter?", a: ["Einfache", "Komplizierte", "Keine"], c: 1 },
-                { short: "Fehler", info: "KIs machen fast nie Rechtschreibfehler.", q: "Machen sie Fehler?", a: ["Ja, viele", "Fast nie", "Nur sonntags"], c: 1 },
-                { short: "Gefühle", info: "KIs haben keine echten Emotionen.", q: "Haben sie Gefühle?", a: ["Ja", "Nein", "Manchmal"], c: 1 },
-                { short: "Satzbau", info: "Sätze sind oft perfekt gebaut.", q: "Wie ist der Satzbau?", a: ["Chaotisch", "Perfekt", "Kurz"], c: 1 },
-                { short: "Wiederholung", info: "KIs wiederholen oft Informationen.", q: "Was passiert oft?", a: ["Wiederholung", "Stille", "Witze"], c: 0 },
-                { short: "Wissen", info: "KIs wissen nichts über dich persönlich.", q: "Was wissen sie?", a: ["Alles", "Nichts privates", "Dein Alter"], c: 1 },
-                { short: "Witze", info: "KI-Witze sind oft trocken oder unlogisch.", q: "Wie sind Witze?", a: ["Lustig", "Oft unlogisch", "Super"], c: 1 },
-                { short: "Tempo", info: "KIs schreiben ganze Seiten in Sekunden.", q: "Wie schnell?", a: ["Langsam", "In Sekunden", "Minuten"], c: 1 },
-                { short: "Stil", info: "Der Stil bleibt immer gleich sachlich.", q: "Wie ist der Stil?", a: ["Sachlich", "Emotional", "Böse"], c: 0 }
+                { short: "Höflichkeit", info: "KI-Chatbots sind darauf trainiert, immer extrem höflich zu sein.", q: "Wie antwortet eine KI meistens auf Fragen?", a: ["Eher frech und kurz", "Auffallend höflich und ausschweifend", "Aggressiv und laut"], c: 1, h: "KIs sagen oft Dinge wie: 'Gerne helfe ich dir bei deinem Anliegen'." },
+                { short: "Wortwahl", info: "KIs benutzen oft sehr förmliche und komplizierte Wörter.", q: "Welche Wortwahl ist typisch für eine KI?", a: ["Viel Jugendsprache", "Sehr förmliche und komplizierte Ausdrücke", "Keine ganzen Sätze"], c: 1, h: "KIs klingen oft wie ein sehr schlaues Lexikon, selten wie ein Kumpel." },
+                { short: "Fehler", info: "KIs machen im Gegensatz zu Menschen fast nie Flüchtigkeitsfehler beim Tippen.", q: "Was fehlt in KI-Texten fast immer?", a: ["Großbuchstaben", "Typische Tipp- oder Rechtschreibfehler", "Satzzeichen"], c: 1, h: "Überlege: Wenn du schnell eine Nachricht tippst, vertippst du dich manchmal?" },
+                { short: "Gefühle", info: "KIs haben keine echten Emotionen, sie simulieren sie nur.", q: "Haben KIs wirklich Gefühle?", a: ["Ja, sie können weinen", "Nein, sie simulieren Gefühle nur durch Text", "Nur wenn man sie beleidigt"], c: 1, h: "Ein Computerchip kann zwar nett schreiben, aber er hat kein Herz." },
+                { short: "Satzbau", info: "Sätze einer KI sind oft grammatikalisch perfekt, wirken aber steif.", q: "Wie wirkt der Satzbau einer KI oft auf uns?", a: ["Chaotisch und wirr", "Perfekt gebaut, aber etwas künstlich steif", "Immer extrem kurz"], c: 1, h: "Wirkt der Text wie aus einem perfekten Deutsch-Schulbuch kopiert?" },
+                { short: "Wiederholung", info: "KIs neigen dazu, bestimmte Informationen im Text zu wiederholen.", q: "Was ist eine textliche Eigenheit von KIs?", a: ["Sie wiederholen oft Informationen oder Phrasen", "Sie schreiben jedes Wort nur einmal", "Sie nutzen niemals Adjektive"], c: 0, h: "Erklärt der Text ein und dieselbe Sache vielleicht zwei- oder dreimal?" },
+                { short: "Wissen", info: "KIs wissen viel Allgemeines, aber nichts über dein privates Leben.", q: "Was weiß eine KI standardmäßig nicht?", a: ["Dass die Erde rund ist", "Private Details über dein tägliches Leben", "Wie spät es ist"], c: 1, h: "Weiß die KI, was du heute Morgen zum Frühstück gegessen hast?" },
+                { short: "Witze", info: "KI-Witze wirken oft hölzern oder sind logisch nicht ganz stimmig.", q: "Wie empfinden Menschen oft KI-Witze?", a: ["Als brüllend komisch", "Oft unlogisch oder etwas 'trocken'", "Als viel zu kurz"], c: 1, h: "Oft fehlt bei KI-Witzen die wirkliche Pointe oder der Witz wird erklärt." },
+                { short: "Tempo", info: "KIs schreiben extrem schnell, viel schneller als jeder Mensch tippen könnte.", q: "Wie schnell generiert eine KI einen ganzen Aufsatz?", a: ["In mehreren Stunden", "In wenigen Sekunden", "Über Nacht"], c: 1, h: "Ein Mensch braucht Zeit zum Nachdenken und Tippen. Wie ist das bei der KI?" },
+                { short: "Stil", info: "Der Stil einer KI bleibt meistens gleichmäßig sachlich.", q: "Welcher Grundton ist typisch für KI-Texte?", a: ["Sachlich und neutral", "Sehr emotional und wütend", "Hektisch und unruhig"], c: 0, h: "KIs versuchen fast immer, neutral und informativ zu klingen." }
             ],
             fak: [
-                { short: "Lügen", info: "KIs erfinden manchmal Fakten (Halluzination).", q: "Sagen sie immer die Wahrheit?", a: ["Ja", "Nein, sie flunkern", "Nur im Winter"], c: 1 },
-                { short: "Quellen", info: "KIs können keine echten Quellen nennen.", q: "Haben sie Quellen?", a: ["Ja", "Oft erfunden", "Immer"], c: 1 },
-                { short: "Aktualität", info: "KIs wissen oft nicht von heute.", q: "Wissen sie alles?", a: ["Ja", "Nicht das Aktuelle", "Nur Sport"], c: 1 },
-                { short: "Logik", info: "Einfache Logikrätsel schlagen oft fehl.", q: "Sind sie logisch?", a: ["Immer", "Nicht immer", "Gar nicht"], c: 1 },
-                { short: "Mathe", info: "KIs machen oft Fehler beim Rechnen.", q: "Können sie rechnen?", a: ["Perfekt", "Oft fehlerhaft", "Nur Plus"], c: 1 },
-                { short: "Experimente", info: "KIs können nicht experimentieren.", q: "Probieren sie Dinge aus?", a: ["Ja", "Nein", "Oft"], c: 1 },
-                { short: "Meinung", info: "KIs haben keine eigene Meinung.", q: "Haben sie eine Meinung?", a: ["Ja", "Nein", "Immer"], c: 1 },
-                { short: "Zukunft", info: "KIs können nicht hellsehen.", q: "Wissen sie die Zukunft?", a: ["Ja", "Nein", "Vielleicht"], c: 1 },
-                { short: "Werte", info: "KIs haben keine Moral.", q: "Haben sie Werte?", a: ["Ja", "Nein", "Immer"], c: 1 },
-                { short: "Prüfung", info: "Man muss Informationen immer prüfen.", q: "Sollte man prüfen?", a: ["Ja, immer!", "Nein", "Egal"], c: 0 }
+                { short: "Halluzinieren", info: "KIs erfinden manchmal Fakten, wenn sie keine Antwort wissen.", q: "Sagen KIs immer die Wahrheit?", a: ["Ja, KIs können nicht lügen", "Nein, sie 'halluzinieren' manchmal Fakten", "Nur wenn sie mit dem Internet verbunden sind"], c: 1, h: "KIs wollen immer eine Antwort geben, auch wenn sie eigentlich raten müssen." },
+                { short: "Quellen", info: "KIs können Quellenangaben oft nicht korrekt zuordnen oder erfinden sie.", q: "Warum sollte man Quellenangaben einer KI prüfen?", a: ["Weil sie immer veraltet sind", "Weil KIs Quellen oft erfinden oder falsch zitieren", "Weil die Links zu groß sind"], c: 1, h: "Prüfe, ob der genannte Buchtitel oder Link wirklich existiert." },
+                { short: "Aktualität", info: "KIs haben oft ein begrenztes Wissen bis zu einem bestimmten Datum.", q: "Was weiß eine KI eventuell nicht?", a: ["Alles, was in Büchern steht", "Ganz aktuelle Ereignisse von heute", "Wer der erste Mensch auf dem Mond war"], c: 1, h: "Wann wurde die KI zum letzten Mal mit neuen Daten 'gefüttert'?" },
+                { short: "Logik", info: "Einfache Logikrätsel bringen KIs oft an ihre Grenzen.", q: "Sind KIs unfehlbare Logik-Genies?", a: ["Ja, absolut", "Nein, sie machen bei Logikrätseln oft Fehler", "Nur wenn man Englisch spricht"], c: 1, h: "Klassisches Rätsel: Was ist schwerer, ein Kilo Federn oder ein Kilo Blei?" },
+                { short: "Mathe", info: "KIs berechnen Ergebnisse basierend auf Wahrscheinlichkeiten.", q: "Was kann bei komplizierter Mathe mit KIs passieren?", a: ["Sie rechnen schneller als Taschenrechner", "Sie geben manchmal falsche Ergebnisse aus", "Sie weigern sich zu rechnen"], c: 1, h: "KIs 'rechnen' nicht echt, sie schätzen das nächste logische Wort." },
+                { short: "Experimente", info: "KIs können keine physischen Experimente durchführen.", q: "Können KIs physikalische Gesetze selbst testen?", a: ["Ja, in einem Roboter", "Nein, sie haben nur gelesenes Wissen darüber", "Nur in der Schwerelosigkeit"], c: 1, h: "Die KI sitzt in einem Serverraum, sie steht nicht echt im Labor." },
+                { short: "Meinung", info: "KIs sind so programmiert, dass sie neutral bleiben sollen.", q: "Haben KIs eine eigene politische Meinung?", a: ["Ja, eine sehr starke", "Nein, sie sollen neutral bleiben", "Nur am Wochenende"], c: 1, h: "Google oder Microsoft geben ihren KIs strenge Regeln für Neutralität." },
+                { short: "Zukunft", info: "KIs können Trends berechnen, aber nicht in die Zukunft sehen.", q: "Wissen KIs, was morgen genau passieren wird?", a: ["Ja, sie sind Hellseher", "Nein, sie können nur Wahrscheinlichkeiten schätzen", "Nur wenn sie aufgeladen sind"], c: 1, h: "Kann jemand wissen, wer nächstes Jahr die Fußball-WM gewinnt?" },
+                { short: "Werte", info: "KIs haben keine Moral oder ethische Werte.", q: "Besitzen KIs ein eigenes Gewissen?", a: ["Ja, wie ein Mensch", "Nein, sie folgen nur ihren Programmierregeln", "Nur fortgeschrittene KIs"], c: 1, h: "Eine Maschine hat kein Herz und kein echtes Gefühl für Richtig und Falsch." },
+                { short: "Prüfung", info: "Detektive prüfen Informationen immer mit einer zweiten Quelle.", q: "Wie verhältst du dich bei einer wichtigen KI-Info?", a: ["Ich prüfe sie immer mit einer zweiten, sicheren Quelle", "Ich glaube ihr sofort", "Ich frage eine andere KI"], c: 0, h: "Verlasse dich bei Hausaufgaben niemals auf nur eine einzige Aussage." }
             ],
             dat: [
-                { short: "Name", info: "Gib niemals deinen echten Namen ein.", q: "Was gibst du an?", a: ["Echten Namen", "Spitznamen", "Adresse"], c: 1 },
-                { short: "Adresse", info: "Deine Adresse ist privat.", q: "Darf die KI sie wissen?", a: ["Ja", "Nein", "Immer"], c: 1 },
-                { short: "Fotos", info: "Lade keine privaten Fotos hoch.", q: "Darfst du Fotos zeigen?", a: ["Ja", "Nein", "Immer"], c: 1 },
-                { short: "Passwort", info: "Gib niemals Passwörter ein.", q: "Verrätst du Passwörter?", a: ["Ja", "Niemals!", "Immer"], c: 1 },
-                { short: "Schule", info: "Nenne nicht den Namen deiner Schule.", q: "Was nennst du?", a: ["Schulname", "Nichts", "Klassenraum"], c: 1 },
-                { short: "Familie", info: "Erzähle nichts über deine Familie.", q: "Was ist privat?", a: ["Alles", "Nichts", "Essen"], c: 0 },
-                { short: "Geheimnisse", info: "KIs speichern alles.", q: "Solltest du Geheimnisse sagen?", a: ["Ja", "Nein!", "Vielleicht"], c: 1 },
-                { short: "Standort", info: "Deaktiviere den Standort.", q: "Was ist wichtig?", a: ["Anlassen", "Ausschalten", "Egal"], c: 1 },
-                { short: "Abmeldung", info: "Melde dich immer ab.", q: "Was tust du am Ende?", a: ["Anlassen", "Abmelden", "Weglaufen"], c: 1 },
-                { short: "Sicherheit", info: "Sicherheit geht vor.", q: "Was ist am wichtigsten?", a: ["Tempo", "Sicherheit", "Spaß"], c: 1 }
+                { short: "Name", info: "Gib niemals deinen vollen Namen in einen Chatbot ein.", q: "Welchen Namen nutzt du für die KI?", a: ["Meinen vollen Namen", "Einen Spitznamen oder Pseudonym", "Den Namen meines Nachbarn"], c: 1, h: "Nutze lieber Fantasienamen wie 'Pixel-Held' oder 'Turbo-Eule'." },
+                { short: "Adresse", info: "Deine Wohnadresse ist eine private Information.", q: "Sollte die KI wissen, wo du wohnst?", a: ["Ja, für bessere Hilfe", "Auf keinen Fall!", "Nur wenn sie fragt"], c: 1, h: "Deine Straße und Hausnummer gehen nur dich etwas an." },
+                { short: "Fotos", info: "Fotos von dir können von der KI gespeichert werden.", q: "Was passiert mit Fotos, die du hochlädst?", a: ["Sie werden sofort gelöscht", "Sie werden eventuell zum Training gespeichert", "Sie werden ausgedruckt"], c: 1, h: "Was einmal im Internet gelandet ist, lässt sich schwer wieder löschen." },
+                { short: "Passwort", info: "Passwörter sind streng geheim.", q: "Wem verrätst du deine Passwörter?", a: ["Der KI zur Speicherung", "Niemals jemandem (außer Eltern)", "Allen meinen Freunden"], c: 1, h: "Passwörter sind wie geheime Schlüssel zu deinem Haus." },
+                { short: "Schule", info: "Nenne nicht den genauen Namen deiner Schule oder Klasse.", q: "Warum verschweigst du deinen Schulnamen?", a: ["Weil es die KI langweilt", "Um meine Privatsphäre zu schützen", "Weil es verboten ist"], c: 1, h: "Über den Schulnamen kann man leicht herausfinden, in welcher Stadt du wohnst." },
+                { short: "Familie", info: "Erzähle keine privaten Details über deine Familie.", q: "Welche Informationen gehören nicht in den Chat?", a: ["Private und persönliche Details", "Dass ich eine Familie habe", "Meine Lieblingsfarbe"], c: 0, h: "Erzähle keine Geschichten über Streit oder Krankheiten in der Familie." },
+                { short: "Geheimnisse", info: "Das Internet vergisst nie – auch Chatbots nicht.", q: "Solltest du der KI Geheimnisse anvertrauen?", a: ["Ja, sie ist ein guter Zuhörer", "Nein, weil alles gespeichert wird", "Nur wenn ich anonym bin"], c: 1, h: "Die KI speichert alles, um daraus für die Zukunft zu lernen." },
+                { short: "Standort", info: "Deaktiviere die Standortfreigabe in deinem Browser.", q: "Was ist beim Surfen wichtig?", a: ["Den Standort immer zu teilen", "Den Standortzugriff zu verweigern", "Immer im Freien zu sein"], c: 1, h: "Die KI muss nicht wissen, in welcher Stadt oder Straße du gerade bist." },
+                { short: "Abmeldung", info: "Melde dich nach der Nutzung immer aus deinem Account ab.", q: "Was tust du, wenn du fertig bist?", a: ["Den Computer einfach anlassen", "Mich sicher ausloggen/abmelden", "Den Stecker ziehen"], c: 1, h: "Sonst könnte der Nächste am Computer in deinem Namen Schabernack treiben." },
+                { short: "Sicherheit", info: "Datensicherheit ist die Grundlage jeder guten Ermittlung.", q: "Was ist beim Umgang mit KI am wichtigsten?", a: ["Dass es schnell geht", "Der Schutz meiner persönlichen Daten", "Dass es viele bunte Bilder gibt"], c: 1, h: "Überlege immer: Würde ich das einem völlig Fremden auf der Straße sagen?" }
             ]
         };
 
@@ -710,10 +734,12 @@
         }
 
         function loadStep() {
-            const step = missionData[currentType]?.[currentIndex] || {info: "Info fehlt", q: "Frage?", a: ["A","B"], c: 0};
+            const step = missionData[currentType]?.[currentIndex] || {info: "Info fehlt", q: "Frage?", a: ["A","B"], c: 0, h: ""};
             document.getElementById('stepCounter').innerText = `Station ${currentIndex+1}/10`;
             document.getElementById('info-text').innerText = step.info;
             document.getElementById('question-text').innerText = step.q;
+            document.getElementById('hint-text').innerText = step.h;
+            
             const mediaCont = document.getElementById('step-media');
             const img = document.getElementById('missionImg');
             const errorBox = document.getElementById('image-error-box');
@@ -741,6 +767,7 @@
                             missionProgress[currentType].push(currentIndex);
                         }
                         document.getElementById('next-btn').classList.remove('hidden');
+                        document.getElementById('hint-btn').classList.add('hidden'); // Hinweis verstecken wenn gelöst
                         updateUI();
                     } else { 
                         b.classList.add('wrong'); 
@@ -748,13 +775,27 @@
                 };
                 optDiv.appendChild(b);
             });
+            
             document.getElementById('step-info').classList.remove('hidden');
             document.getElementById('step-question').classList.add('hidden');
             document.getElementById('next-btn').classList.add('hidden');
             document.getElementById('feedback-msg').style.display = 'none';
+            document.getElementById('hint-msg').style.display = 'none';
+            document.getElementById('hint-btn').classList.remove('hidden'); // Button zurücksetzen
         }
 
-        function showQuestion() { document.getElementById('step-info').classList.add('hidden'); document.getElementById('step-question').classList.remove('hidden'); }
+        function showQuestion() { 
+            document.getElementById('step-info').classList.add('hidden'); 
+            document.getElementById('step-question').classList.remove('hidden'); 
+        }
+        
+        function showHint() {
+            // Zeige den Hinweistext an
+            document.getElementById('hint-msg').style.display = 'block';
+            // Verstecke den Button, da der Hinweis nun sichtbar ist
+            document.getElementById('hint-btn').classList.add('hidden');
+        }
+
         function nextStep() { currentIndex++; if(currentIndex < 10) loadStep(); else showFinish(); }
         
         function showFinish() {
