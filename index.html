@@ -220,6 +220,8 @@
         }
         .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
         .btn-ghost { background: transparent; border: 2px solid var(--border-color); color: var(--text-color); }
+        .btn-confirm { background: var(--warning); color: white; margin-top: 10px; }
+        .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn-small { padding: 8px 12px; font-size: 0.8rem; border-radius: 8px; }
 
         .hub-grid {
@@ -333,13 +335,13 @@
             background: var(--card-bg); color: var(--text-color);
             text-align: left; cursor: pointer; font-size: 1rem;
         }
-        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
-        .option-btn.wrong { background: var(--error); color: white; border-color: var(--error); }
+        .option-btn.selected { border-color: var(--accent-color); background: rgba(37, 99, 235, 0.1); }
+        .option-btn.correct { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+        .option-btn.wrong { background: var(--error) !important; color: white !important; border-color: var(--error) !important; }
 
         .feedback-area { margin-top: 20px; padding: 15px; border-radius: 12px; font-weight: bold; display: none; }
         .info-step { background: rgba(37, 99, 235, 0.1); border-left: 5px solid var(--accent-color); padding: 20px; border-radius: 0 16px 16px 0; margin-bottom: 20px; }
         
-        /* Hint Styling */
         .hint-area {
             background: rgba(245, 158, 11, 0.1);
             border: 2px dashed var(--warning);
@@ -390,7 +392,6 @@
         }
         @keyframes slideUp { from { transform: translate(-50%, 50px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 
-        /* Fake-Input zum Kopieren */
         #copy-helper { position: absolute; left: -9999px; top: 0; }
 
         .overlay-bg {
@@ -401,6 +402,19 @@
             z-index: 90;
         }
         .overlay-bg.active { display: block; }
+
+        .solved-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--success);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -409,12 +423,10 @@
     <input type="text" id="copy-helper">
     <div class="toast" id="toast">Link kopiert!</div>
 
-    <!-- Zoom Modal -->
     <div class="zoom-overlay" id="zoom-overlay" onclick="toggleZoom()">
         <img id="zoomed-img" src="" alt="Vergrößert">
     </div>
 
-    <!-- Zertifikat Druckbereich -->
     <div id="certificate-area">
         <div class="cert-border-inner">
             <div class="cert-icon">🔍</div>
@@ -439,7 +451,6 @@
     </div>
 
     <div class="app-wrapper">
-        <!-- Sidebar Navigation -->
         <aside class="sidebar-left" id="sidebar-left">
             <div class="sidebar-title">Ermittlungen <button class="close-btn" onclick="toggleLeftSidebar()"><i data-lucide="x"></i></button></div>
             <div class="nav-item" id="nav-hub" onclick="goToHub(); toggleLeftSidebar();"><i data-lucide="layout-grid"></i> Zentrale</div>
@@ -462,7 +473,6 @@
                 <button class="btn btn-ghost" onclick="toggleDarkMode()"><i data-lucide="moon"></i></button>
             </header>
 
-            <!-- Intro -->
             <div id="view-intro" class="view active">
                 <div class="station-box text-center">
                     <i data-lucide="shield-check" style="width: 64px; height: 64px; color: var(--accent-color);"></i>
@@ -476,7 +486,6 @@
                 </div>
             </div>
 
-            <!-- Hub -->
             <div id="view-hub" class="view">
                 <h2>Einsatz-Zentrale</h2>
                 <div class="hub-grid">
@@ -503,7 +512,6 @@
                 </div>
             </div>
 
-            <!-- Mission Menu -->
             <div id="view-mission-menu" class="view">
                 <button class="btn btn-ghost" onclick="goToHub()"><i data-lucide="arrow-left"></i> Zurück</button>
                 <div class="station-box">
@@ -512,7 +520,6 @@
                 </div>
             </div>
 
-            <!-- Mission Play -->
             <div id="view-mission" class="view">
                 <button class="btn btn-ghost" onclick="backToMenu()"><i data-lucide="grid"></i> Übersicht</button>
                 <div class="station-box">
@@ -527,6 +534,7 @@
                         </div>
                     </div>
                     <div id="step-info" class="info-step">
+                        <div id="solved-badge" class="solved-status hidden"><i data-lucide="check-circle"></i> Station abgeschlossen</div>
                         <h3>💡 Detektiv-Wissen</h3>
                         <p id="info-text"></p>
                         <button class="btn" onclick="showQuestion()">Gelesen!</button>
@@ -537,9 +545,14 @@
                             <strong>🕵️ Detektiv-Tipp:</strong> <span id="hint-text"></span>
                         </div>
                         <div id="question-options"></div>
+                        
+                        <!-- Bestätigen-Button -->
+                        <button id="confirm-btn" class="btn btn-confirm hidden" onclick="confirmAnswer()" style="width: 100%;">
+                            <i data-lucide="check-square"></i> Antwort einloggen
+                        </button>
+
                         <div id="feedback-msg" class="feedback-area"></div>
                         
-                        <!-- Hinweis-Button jetzt hier im Fragenbereich -->
                         <button id="hint-btn" class="btn btn-ghost" onclick="showHint()" style="margin-top: 10px; font-size: 0.9rem; width: 100%;">
                             <i data-lucide="lightbulb"></i> Brauchst du einen Hinweis?
                         </button>
@@ -549,7 +562,6 @@
                 </div>
             </div>
 
-            <!-- Finish -->
             <div id="view-finish" class="view text-center">
                 <div class="station-box">
                     <i data-lucide="party-popper" style="width: 80px; height: 80px; color: gold;"></i>
@@ -560,7 +572,6 @@
             </div>
         </main>
 
-        <!-- Sidebar Right Status -->
         <aside class="sidebar-right" id="sidebar-right">
             <div class="sidebar-title">Status <button class="close-btn" onclick="toggleRightSidebar()"><i data-lucide="x"></i></button></div>
             <div class="status-card">
@@ -595,6 +606,7 @@
         let detectiveName = "Unbekannt";
         let currentType = "";
         let currentIndex = 0;
+        let selectedIndex = null;
         let totalSeconds = 0;
         let timerInterval = null;
         let missionProgress = { img: [], txt: [], fak: [], dat: [] };
@@ -633,7 +645,7 @@
                 { short: "Mathe", info: "KIs berechnen Ergebnisse basierend auf Wahrscheinlichkeiten.", q: "Was kann bei komplizierter Mathe mit KIs passieren?", a: ["Sie rechnen schneller als Taschenrechner", "Sie geben manchmal falsche Ergebnisse aus", "Sie weigern sich zu rechnen"], c: 1, h: "KIs 'rechnen' nicht echt, sie schätzen das nächste logische Wort." },
                 { short: "Experimente", info: "KIs können keine physischen Experimente durchführen.", q: "Können KIs physikalische Gesetze selbst testen?", a: ["Ja, in einem Roboter", "Nein, sie haben nur gelesenes Wissen darüber", "Nur in der Schwerelosigkeit"], c: 1, h: "Die KI sitzt in einem Serverraum, sie steht nicht echt im Labor." },
                 { short: "Meinung", info: "KIs sind so programmiert, dass sie neutral bleiben sollen.", q: "Haben KIs eine eigene politische Meinung?", a: ["Ja, eine sehr starke", "Nein, sie sollen neutral bleiben", "Nur am Wochenende"], c: 1, h: "Google oder Microsoft geben ihren KIs strenge Regeln für Neutralität." },
-                { short: "Zukunft", info: "KIs können Trends berechnen, aber nicht in die Zukunft sehen.", q: "Wissen KIs, was morgen genau passieren wird?", a: ["Ja, sie sind Hellseher", "Nein, sie können nur Wahrscheinlichkeiten schätzen", "Nur wenn sie aufgeladen sind"], c: 1, h: "Kann jemand wissen, wer nächstes Jahr die Fußball-WM gewinnt?" },
+                { short: "Zukunft", info: "KIs können trends berechnen, aber nicht in die Zukunft sehen.", q: "Wissen KIs, was morgen genau passieren wird?", a: ["Ja, sie sind Hellseher", "Nein, sie können nur Wahrscheinlichkeiten schätzen", "Nur wenn sie aufgeladen sind"], c: 1, h: "Kann jemand wissen, wer nächstes Jahr die Fußball-WM gewinnt?" },
                 { short: "Werte", info: "KIs haben keine Moral oder ethische Werte.", q: "Besitzen KIs ein eigenes Gewissen?", a: ["Ja, wie ein Mensch", "Nein, sie folgen nur ihren Programmierregeln", "Nur fortgeschrittene KIs"], c: 1, h: "Eine Maschine hat kein Herz und kein echtes Gefühl für Richtig und Falsch." },
                 { short: "Prüfung", info: "Detektive prüfen Informationen immer mit einer zweiten Quelle.", q: "Wie verhältst du dich bei einer wichtigen KI-Info?", a: ["Ich prüfe sie immer mit einer zweiten, sicheren Quelle", "Ich glaube ihr sofort", "Ich frage eine andere KI"], c: 0, h: "Verlasse dich bei Hausaufgaben niemals auf nur eine einzige Aussage." }
             ],
@@ -651,7 +663,6 @@
             ]
         };
 
-        // Bitmaske für effizienten URL-Speicher
         function packProgress() {
             let packed = {};
             for (let key in missionProgress) {
@@ -754,11 +765,17 @@
 
         function loadStep() {
             const step = missionData[currentType]?.[currentIndex] || {info: "Info fehlt", q: "Frage?", a: ["A","B"], c: 0, h: ""};
+            const isAlreadySolved = missionProgress[currentType].includes(currentIndex);
+            selectedIndex = null;
+            
             document.getElementById('stepCounter').innerText = `Station ${currentIndex+1}/10`;
             document.getElementById('info-text').innerText = step.info;
             document.getElementById('question-text').innerText = step.q;
             document.getElementById('hint-text').innerText = step.h;
             
+            const badge = document.getElementById('solved-badge');
+            if(isAlreadySolved) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+
             const mediaCont = document.getElementById('step-media');
             const img = document.getElementById('missionImg');
             const errorBox = document.getElementById('image-error-box');
@@ -776,31 +793,63 @@
             optDiv.innerHTML = "";
             step.a.forEach((ans, i) => {
                 const b = document.createElement('button');
-                b.className = "option-btn"; b.innerText = ans;
+                b.className = "option-btn"; 
+                b.innerText = ans;
+                
+                if(isAlreadySolved) {
+                    if(i === step.c) b.classList.add('correct');
+                    b.disabled = true;
+                }
+
                 b.onclick = () => {
-                    const options = document.querySelectorAll('.option-btn');
-                    if(i === step.c) {
-                        b.classList.add('correct');
-                        options.forEach(o => o.disabled = true);
-                        if(!missionProgress[currentType].includes(currentIndex)) {
-                            missionProgress[currentType].push(currentIndex);
-                        }
-                        document.getElementById('next-btn').classList.remove('hidden');
-                        document.getElementById('hint-btn').classList.add('hidden'); // Hinweis verstecken wenn gelöst
-                        updateUI();
-                    } else { 
-                        b.classList.add('wrong'); 
-                    }
+                    if(isAlreadySolved) return;
+                    document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+                    b.classList.add('selected');
+                    selectedIndex = i;
+                    document.getElementById('confirm-btn').classList.remove('hidden');
                 };
                 optDiv.appendChild(b);
             });
             
             document.getElementById('step-info').classList.remove('hidden');
             document.getElementById('step-question').classList.add('hidden');
-            document.getElementById('next-btn').classList.add('hidden');
             document.getElementById('feedback-msg').style.display = 'none';
             document.getElementById('hint-msg').style.display = 'none';
-            document.getElementById('hint-btn').classList.remove('hidden'); // Button zurücksetzen
+            document.getElementById('confirm-btn').classList.add('hidden');
+            
+            if(isAlreadySolved) {
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('hint-btn').classList.add('hidden');
+            } else {
+                document.getElementById('next-btn').classList.add('hidden');
+                document.getElementById('hint-btn').classList.remove('hidden');
+            }
+        }
+
+        function confirmAnswer() {
+            if (selectedIndex === null) return;
+            const step = missionData[currentType][currentIndex];
+            const options = document.querySelectorAll('.option-btn');
+            
+            options.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('selected');
+                if (i === step.c) {
+                    btn.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== step.c) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            if(!missionProgress[currentType].includes(currentIndex)) {
+                missionProgress[currentType].push(currentIndex);
+            }
+
+            document.getElementById('confirm-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+            document.getElementById('hint-btn').classList.add('hidden');
+            updateUI();
         }
 
         function showQuestion() { 
@@ -809,18 +858,30 @@
         }
         
         function showHint() {
-            // Zeige den Hinweistext an
             document.getElementById('hint-msg').style.display = 'block';
-            // Verstecke den Button, da der Hinweis nun sichtbar ist
             document.getElementById('hint-btn').classList.add('hidden');
         }
 
-        function nextStep() { currentIndex++; if(currentIndex < 10) loadStep(); else showFinish(); }
+        function nextStep() { 
+            currentIndex++; 
+            if(currentIndex < 10) {
+                loadStep(); 
+            } else {
+                const totalSolved = missionProgress.img.length + missionProgress.txt.length + 
+                                    missionProgress.fak.length + missionProgress.dat.length;
+                
+                if (totalSolved >= 40) {
+                    showFinish(); 
+                } else {
+                    backToMenu();
+                }
+            }
+        }
         
         function showFinish() {
             showView('view-finish');
             document.getElementById('finish-congrats').innerText = `Super, ${detectiveName}!`;
-            document.getElementById('finish-text').innerText = `Du hast alle Aufgaben dieser Mission erfolgreich gemeistert.`;
+            document.getElementById('finish-text').innerText = `Du hast alle Aufgaben erfolgreich gemeistert und bist nun ein Meister-Ermittler.`;
         }
 
         function updateUI() {
@@ -884,11 +945,42 @@
             }
         }
         function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
-        function toggleLeftSidebar() { document.getElementById('sidebar-left').classList.toggle('open'); }
-        function toggleRightSidebar() { document.getElementById('sidebar-right').classList.toggle('open'); }
+        
+        function toggleLeftSidebar() { 
+            const sidebar = document.getElementById('sidebar-left');
+            sidebar.classList.toggle('open');
+            // Toggle visibility of the button itself to prevent overlap
+            document.getElementById('btn-toggle-left').style.display = sidebar.classList.contains('open') ? 'none' : 'flex';
+            
+            if (sidebar.classList.contains('open')) {
+                document.getElementById('overlay-bg').classList.add('active');
+            } else if (!document.getElementById('sidebar-right').classList.contains('open')) {
+                document.getElementById('overlay-bg').classList.remove('active');
+            }
+        }
+        
+        function toggleRightSidebar() { 
+            const sidebar = document.getElementById('sidebar-right');
+            sidebar.classList.toggle('open');
+            // Toggle visibility of the button itself
+            document.getElementById('btn-toggle-right').style.display = sidebar.classList.contains('open') ? 'none' : 'flex';
+
+            if (sidebar.classList.contains('open')) {
+                document.getElementById('overlay-bg').classList.add('active');
+            } else if (!document.getElementById('sidebar-left').classList.contains('open')) {
+                document.getElementById('overlay-bg').classList.remove('active');
+            }
+        }
+
         function goToHub() { currentType = ""; showView('view-hub'); }
         function backToMenu() { openMissionMenu(currentType); }
-        function closeSidebars() { document.querySelectorAll('aside, .overlay-bg').forEach(a => a.classList.remove('open', 'active')); }
+        function closeSidebars() { 
+            document.getElementById('sidebar-left').classList.remove('open');
+            document.getElementById('sidebar-right').classList.remove('open');
+            document.getElementById('btn-toggle-left').style.display = 'flex';
+            document.getElementById('btn-toggle-right').style.display = 'flex';
+            document.getElementById('overlay-bg').classList.remove('active');
+        }
     </script>
 </body>
 </html>
