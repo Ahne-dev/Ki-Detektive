@@ -278,7 +278,7 @@
         }
         .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s ease; }
 
-        .station-box { background: var(--card-bg); padding: 30px; border-radius: 24px; border: 2px solid var(--border-color); margin-top: 20px; }
+        .station-box { background: var(--card-bg); padding: 30px; border-radius: 24px; border: 2px solid var(--border-color); margin-top: 20px; position: relative; }
 
         .media-container {
             width: 100%;
@@ -415,6 +415,59 @@
             font-weight: bold;
             margin-bottom: 10px;
         }
+
+        .mission-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .detective-badge {
+            font-size: 0.75rem;
+            background: rgba(37, 99, 235, 0.15);
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .category-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+            font-weight: 900;
+            margin-bottom: 2px;
+        }
+
+        /* Mission Summary Modal */
+        .summary-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .summary-overlay.active { display: flex; }
+        .summary-content {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 3px solid var(--accent-color);
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -425,6 +478,22 @@
 
     <div class="zoom-overlay" id="zoom-overlay" onclick="toggleZoom()">
         <img id="zoomed-img" src="" alt="Vergrößert">
+    </div>
+
+    <!-- Mission Abschluss Fenster (Summary) -->
+    <div class="summary-overlay" id="mission-summary-overlay">
+        <div class="summary-content">
+            <i data-lucide="award" style="width: 64px; height: 64px; color: gold; margin-bottom: 15px;"></i>
+            <h1 id="summary-title">Mission abgeschlossen!</h1>
+            <p id="summary-text" style="font-size: 1.2rem; margin-bottom: 25px;">Du hast alle Aufgaben dieser Kategorie bearbeitet.</p>
+            <div style="background: rgba(37, 99, 235, 0.1); padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+                <div style="font-size: 0.9rem; opacity: 0.7;">Dein Ergebnis in dieser Mission:</div>
+                <div id="summary-score" style="font-size: 2.5rem; font-weight: 900; color: var(--accent-color);">0 / 10</div>
+            </div>
+            <button class="btn" style="width: 100%;" onclick="goToHubFromSummary()">
+                <i data-lucide="home"></i> Zurück zur Zentrale
+            </button>
+        </div>
     </div>
 
     <div id="certificate-area">
@@ -523,10 +592,18 @@
             <div id="view-mission" class="view">
                 <button class="btn btn-ghost" onclick="backToMenu()"><i data-lucide="grid"></i> Übersicht</button>
                 <div class="station-box">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h2 id="missionTitle">Mission</h2>
-                        <span id="stepCounter">Station 1/10</span>
+                    <div class="mission-header-info">
+                        <div style="display: flex; flex-direction: column;">
+                            <div id="mission-category-label" class="category-label">Kategorie</div>
+                            <h2 id="missionTitle" style="margin: 0;">Mission</h2>
+                            <span id="stepCounter" style="font-size: 0.8rem; opacity: 0.7;">Station 1/10</span>
+                        </div>
+                        <div class="detective-badge">
+                            <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                            <span id="mission-detective-name">Detektiv</span>
+                        </div>
                     </div>
+                    
                     <div id="step-media" class="media-container hidden">
                         <img id="missionImg" src="" alt="Spur" onclick="toggleZoom()" onerror="handleImageError()">
                         <div id="image-error-box" class="image-error-fallback">
@@ -610,6 +687,7 @@
         let totalSeconds = 0;
         let timerInterval = null;
         let missionProgress = { img: [], txt: [], fak: [], dat: [] };
+        let missionScores = { img: 0, txt: 0, fak: 0, dat: 0 }; // Korrekte Antworten zählen
 
         const randomNames = ["Daten-Fuchs", "Code-Eule", "Pixel-Luchs", "Cyber-Dachs", "Info-Panther", "Spur-Wolf"];
         const missionData = {
@@ -617,9 +695,9 @@
                 { short: "Finger", media: "ki-hand.png", info: "KIs zeichnen oft zu viele Finger oder deformierte Hände.", q: "Worauf achtest du bei Händen, um eine KI zu entlarven?", a: ["Ob sie Handschuhe tragen", "Ob die Anzahl der Finger (genau 5) stimmt", "Ob sie Fingernägel haben"], c: 1, h: "Zähle die Finger an einer Hand ganz genau nach." },
                 { short: "Brille", media: "ki-brille.png", info: "Brillenrahmen verschmelzen oft unnatürlich mit der Haut oder den Haaren.", q: "Was ist bei KI-Brillen ein typischer Bildfehler?", a: ["Die Gläser sind immer dunkel", "Der Rahmen verschmilzt mit den Haaren oder dem Gesicht", "Die Brille ist immer zu groß"], c: 1, h: "Schau dir den Übergang zwischen Brillenbügel und Ohren oder Haaren an." },
                 { short: "Hintergrund", media: "ki-hintergrund.png", info: "Linien im Hintergrund (Fenster, Zäune) wirken in KI-Bildern oft verbogen.", q: "Welches Detail im Hintergrund verrät oft eine KI?", a: ["Die Farbe der Blumen", "Verbogene oder unlogische Linien an Gebäuden", "Dass die Sonne scheint"], c: 1, h: "Such nach geraden Kanten von Gebäuden – wirken sie im Hintergrund schief?" },
-                { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft übernatürlich glatt, fast wie Plastik oder Porzellan.", q: "Wie sieht die Haut in vielen KI-Porträts aus?", a: ["Unnatürlich glatt, wie aus Plastik", "Viel zu faltig and alt", "Immer voller Sommersprossen"], c: 0, h: "Echte Haut hat Poren und kleine Unebenheiten. KI-Haut wirkt oft 'zu perfekt'." },
-                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links and rechts oft völlig unterschiedlich aus.", q: "Was ist bei den Ohren von KI-Menschen oft verdächtig?", a: ["Sie haben gar keine Ohren", "Sie sind asymmetrisch (links und rechts völlig verschieden)", "Sie sind immer unter Haaren versteckt"], c: 1, h: "Vergleiche das linke Ohr mit dem rechten. Sind die Ohrringe gleich?" },
-                { short: "Schilder", media: "ki-schild.png", info: "Texte auf Schildern im Hintergrund sind für KIs schwer. Oft entstehen Fantasie-Buchstaben.", q: "Warum entlarven Schilder im Hintergrund oft ein KI-Bild?", a: ["Die Schilder sind immer blau", "Der Text besteht oft aus unleserlichem Buchstabensalat", "Es fehlen die Preise"], c: 1, h: "Versuche, ein einzelnes Wort auf dem Schild im Hintergrund zu lesen." },
+                { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft übernatürlich glatt, fast wie Plastik oder Porzellan.", q: "Wie sieht die Haut in vielen KI-Porträts aus?", a: ["Unnatürlich glatt, wie aus Plastik", "Viel zu faltig und alt", "Immer voller Sommersprossen"], c: 0, h: "Echte Haut hat Poren und kleine Unebenheiten. KI-Haut wirkt oft 'zu perfekt'." },
+                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links und rechts oft völlig unterschiedlich aus.", q: "Was ist bei den Ohren von KI-Menschen oft verdächtig?", a: ["Sie haben gar keine Ohren", "Sie sind asymmetrisch (links und rechts völlig verschieden)", "Sie sind immer unter Haaren versteckt"], c: 1, h: "Vergleiche das linke Ohr mit dem rechten. Sind die Ohrringe gleich?" },
+                { short: "Schilder", media: "ki-schild.png", info: "Texte auf der Hintergrunde sind für KIs schwer. Oft entstehen Fantasie-Buchstaben.", q: "Warum entlarven Schilder im Hintergrund oft ein KI-Bild?", a: ["Die Schilder sind immer blau", "Der Text besteht oft aus unleserlichem Buchstabensalat", "Es fehlen die Preise"], c: 1, h: "Versuche, ein einzelnes Wort auf dem Schild im Hintergrund zu lesen." },
                 { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen. Schatten fallen in verschiedene Richtungen.", q: "Welcher Fehler tritt bei KI-Schatten häufig auf?", a: ["Die Schattenrichtung passt nicht zur Lichtquelle", "Es gibt im Bild niemals Schatten", "Der Schatten ist bunter als das Objekt"], c: 0, h: "Überlege: Wenn die Sonne oben links ist, wohin müsste der Schatten fallen?" },
                 { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne oder die Zähne verschmelzen miteinander.", q: "Was macht ein KI-Lächeln oft 'unmenschlich'?", a: ["Die KI zeichnet oft zu viele oder verschmolzene Zähne", "Die Zähne fehlen komplett", "Die Zähne sind quadratisch"], c: 0, h: "Schau dir das Lächeln ganz nah an. Zähle die Zähne oder achte auf Lücken." },
                 { short: "Haare", media: "ki-haare.png", info: "Haare sehen bei KIs oft wie gemalt aus oder wachsen unnatürlich aus der Kleidung.", q: "Was ist bei KI-Frisuren oft ein Zeichen für eine Fälschung?", a: ["Die Haare glänzen zu stark", "Einzelne Haare wachsen unnatürlich aus der Haut oder Kleidung", "Die Haare sind immer blond"], c: 1, h: "Verfolge einzelne Haarsträhnen. Wachsen sie logisch aus der Kopfhaut?" },
@@ -642,10 +720,10 @@
                 { short: "Quellen", info: "KIs können Quellenangaben oft nicht korrekt zuordnen oder erfinden sie.", q: "Warum sollte man Quellenangaben einer KI prüfen?", a: ["Weil sie immer veraltet sind", "Weil KIs Quellen oft erfinden oder falsch zitieren", "Weil die Links zu groß sind"], c: 1, h: "Prüfe, ob der genannte Buchtitel oder Link wirklich existiert." },
                 { short: "Aktualität", info: "KIs haben oft ein begrenztes Wissen bis zu einem bestimmten Datum.", q: "Was weiß eine KI eventuell nicht?", a: ["Alles, was in Büchern steht", "Ganz aktuelle Ereignisse von heute", "Wer der erste Mensch auf dem Mond war"], c: 1, h: "Wann wurde die KI zum letzten Mal mit neuen Daten 'gefüttert'?" },
                 { short: "Logik", info: "Einfache Logikrätsel bringen KIs oft an ihre Grenzen.", q: "Sind KIs unfehlbare Logik-Genies?", a: ["Ja, absolut", "Nein, sie machen bei Logikrätseln oft Fehler", "Nur wenn man Englisch spricht"], c: 1, h: "Klassisches Rätsel: Was ist schwerer, ein Kilo Federn oder ein Kilo Blei?" },
-                { short: "Mathe", info: "KIs berechnen Ergebnisse basierend auf Wahrscheinlichkeiten.", q: "Was kann bei komplizierter Mathe mit KIs passieren?", a: ["Sie rechnen schneller als Taschenrechner", "Sie geben manchmal falsche Ergebnisse aus", "Sie weigern sich zu rechnen"], c: 1, h: "KIs 'rechnen' nicht echt, sie schätzen das nächste logische Wort." },
-                { short: "Experimente", info: "KIs können keine physischen Experimente durchführen.", q: "Können KIs physikalische Gesetze selbst testen?", a: ["Ja, in einem Roboter", "Nein, sie haben nur gelesenes Wissen darüber", "Nur in der Schwerelosigkeit"], c: 1, h: "Die KI sitzt in einem Serverraum, sie steht nicht echt im Labor." },
+                { short: "Mathe", info: "KIs berechnen Ergebnisse basierend auf Wahrscheinlichkeiten.", q: "Was kann bei komplizierter Mathe mit KIs passieren?", a: ["Sie rechnen schneller als Taschenrechner", "Sie geben manchmal falsche Ergebnisse aus", "Sie weigern sich zu rechnen"], c: 1, h: "Denk dran: Eine KI ist kein Taschenrechner. Sie schätzt Zahlen nur und kann sich leicht vertun." },
+                { short: "Experimente", info: "KIs können keine physischen Experimente durchführen.", q: "Können KIs physikalische Gesetze selbst testen?", a: ["Ja, in einem Roboter", "Nein, sie haben nur gelesenes Wissen darüber", "Nur in der Schwerelosigkeit"], c: 1, h: "Die KI hat keinen Körper. Sie kann nichts anfassen oder echt im Labor ausprobieren." },
                 { short: "Meinung", info: "KIs sind so programmiert, dass sie neutral bleiben sollen.", q: "Haben KIs eine eigene politische Meinung?", a: ["Ja, eine sehr starke", "Nein, sie sollen neutral bleiben", "Nur am Wochenende"], c: 1, h: "Google oder Microsoft geben ihren KIs strenge Regeln für Neutralität." },
-                { short: "Zukunft", info: "KIs können trends berechnen, aber nicht in die Zukunft sehen.", q: "Wissen KIs, was morgen genau passieren wird?", a: ["Ja, sie sind Hellseher", "Nein, sie können nur Wahrscheinlichkeiten schätzen", "Nur wenn sie aufgeladen sind"], c: 1, h: "Kann jemand wissen, wer nächstes Jahr die Fußball-WM gewinnt?" },
+                { short: "Zukunft", info: "KIs können Trends berechnen, aber nicht in die Zukunft sehen.", q: "Wissen KIs, was morgen genau passieren wird?", a: ["Ja, sie sind Hellseher", "Nein, sie können nur Wahrscheinlichkeiten schätzen", "Nur wenn sie aufgeladen sind"], c: 1, h: "Kann jemand wissen, wer nächstes Jahr die Fußball-WM gewinnt?" },
                 { short: "Werte", info: "KIs haben keine Moral oder ethische Werte.", q: "Besitzen KIs ein eigenes Gewissen?", a: ["Ja, wie ein Mensch", "Nein, sie folgen nur ihren Programmierregeln", "Nur fortgeschrittene KIs"], c: 1, h: "Eine Maschine hat kein Herz und kein echtes Gefühl für Richtig und Falsch." },
                 { short: "Prüfung", info: "Detektive prüfen Informationen immer mit einer zweiten Quelle.", q: "Wie verhältst du dich bei einer wichtigen KI-Info?", a: ["Ich prüfe sie immer mit einer zweiten, sicheren Quelle", "Ich glaube ihr sofort", "Ich frage eine andere KI"], c: 0, h: "Verlasse dich bei Hausaufgaben niemals auf nur eine einzige Aussage." }
             ],
@@ -670,12 +748,16 @@
                 missionProgress[key].forEach(idx => mask |= (1 << idx));
                 packed[key] = mask;
             }
-            return btoa(JSON.stringify(packed));
+            // Wir packen auch die Scores mit ein
+            const scores = missionScores;
+            return btoa(JSON.stringify({p: packed, s: scores}));
         }
 
         function unpackProgress(str) {
             try {
-                let packed = JSON.parse(atob(str));
+                let data = JSON.parse(atob(str));
+                let packed = data.p;
+                missionScores = data.s || { img: 0, txt: 0, fak: 0, dat: 0 };
                 let unpacked = { img: [], txt: [], fak: [], dat: [] };
                 for (let key in packed) {
                     for (let i = 0; i < 10; i++) {
@@ -709,6 +791,7 @@
                 }
             }
             document.getElementById('status-name').innerText = detectiveName;
+            document.getElementById('mission-detective-name').innerText = detectiveName;
             document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('btn-toggle-left').classList.remove('hidden');
             document.getElementById('btn-toggle-right').classList.remove('hidden');
@@ -766,9 +849,13 @@
         function loadStep() {
             const step = missionData[currentType]?.[currentIndex] || {info: "Info fehlt", q: "Frage?", a: ["A","B"], c: 0, h: ""};
             const isAlreadySolved = missionProgress[currentType].includes(currentIndex);
+            const categoryNames = {img: 'Bild-Labor', txt: 'Text-Check', fak: 'Fakten-Radar', dat: 'Sicherheit'};
             selectedIndex = null;
             
+            document.getElementById('mission-detective-name').innerText = detectiveName;
             document.getElementById('stepCounter').innerText = `Station ${currentIndex+1}/10`;
+            document.getElementById('mission-category-label').innerText = categoryNames[currentType];
+            document.getElementById('missionTitle').innerText = step.short || 'Aufgabe';
             document.getElementById('info-text').innerText = step.info;
             document.getElementById('question-text').innerText = step.q;
             document.getElementById('hint-text').innerText = step.h;
@@ -842,6 +929,11 @@
                 }
             });
 
+            // Score erhöhen wenn korrekt
+            if(selectedIndex === step.c) {
+                missionScores[currentType]++;
+            }
+
             if(!missionProgress[currentType].includes(currentIndex)) {
                 missionProgress[currentType].push(currentIndex);
             }
@@ -855,6 +947,7 @@
         function showQuestion() { 
             document.getElementById('step-info').classList.add('hidden'); 
             document.getElementById('step-question').classList.remove('hidden'); 
+            lucide.createIcons();
         }
         
         function showHint() {
@@ -867,14 +960,31 @@
             if(currentIndex < 10) {
                 loadStep(); 
             } else {
-                const totalSolved = missionProgress.img.length + missionProgress.txt.length + 
-                                    missionProgress.fak.length + missionProgress.dat.length;
-                
-                if (totalSolved >= 40) {
-                    showFinish(); 
-                } else {
-                    backToMenu();
-                }
+                // Mission beendet (10 Stationen fertig)
+                showMissionSummary();
+            }
+        }
+
+        function showMissionSummary() {
+            const overlay = document.getElementById('mission-summary-overlay');
+            const scoreDisplay = document.getElementById('summary-score');
+            const score = missionScores[currentType];
+            
+            scoreDisplay.innerText = `${score} / 10`;
+            overlay.classList.add('active');
+            lucide.createIcons();
+        }
+
+        function goToHubFromSummary() {
+            document.getElementById('mission-summary-overlay').classList.remove('active');
+            
+            const totalSolved = missionProgress.img.length + missionProgress.txt.length + 
+                                missionProgress.fak.length + missionProgress.dat.length;
+            
+            if (totalSolved >= 40) {
+                showFinish(); 
+            } else {
+                goToHub();
             }
         }
         
@@ -949,7 +1059,6 @@
         function toggleLeftSidebar() { 
             const sidebar = document.getElementById('sidebar-left');
             sidebar.classList.toggle('open');
-            // Toggle visibility of the button itself to prevent overlap
             document.getElementById('btn-toggle-left').style.display = sidebar.classList.contains('open') ? 'none' : 'flex';
             
             if (sidebar.classList.contains('open')) {
@@ -957,12 +1066,12 @@
             } else if (!document.getElementById('sidebar-right').classList.contains('open')) {
                 document.getElementById('overlay-bg').classList.remove('active');
             }
+            lucide.createIcons();
         }
         
         function toggleRightSidebar() { 
             const sidebar = document.getElementById('sidebar-right');
             sidebar.classList.toggle('open');
-            // Toggle visibility of the button itself
             document.getElementById('btn-toggle-right').style.display = sidebar.classList.contains('open') ? 'none' : 'flex';
 
             if (sidebar.classList.contains('open')) {
@@ -970,6 +1079,7 @@
             } else if (!document.getElementById('sidebar-left').classList.contains('open')) {
                 document.getElementById('overlay-bg').classList.remove('active');
             }
+            lucide.createIcons();
         }
 
         function goToHub() { currentType = ""; showView('view-hub'); }
@@ -980,6 +1090,7 @@
             document.getElementById('btn-toggle-left').style.display = 'flex';
             document.getElementById('btn-toggle-right').style.display = 'flex';
             document.getElementById('overlay-bg').classList.remove('active');
+            lucide.createIcons();
         }
     </script>
 </body>
