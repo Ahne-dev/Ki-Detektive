@@ -954,10 +954,38 @@
         }
 
         function nextStep() { 
-            currentIndex++; 
-            if(currentIndex < 10) {
-                loadStep(); 
+            // Überprüfen, ob die Mission wirklich vollständig ist (10 Stationen gelöst)
+            if (missionProgress[currentType].length === 10) {
+                showMissionSummary();
+                return;
+            }
+
+            // Falls nicht alle 10 gelöst sind, suche die nächste offene Station
+            let nextUnsolved = -1;
+
+            // Suche vorwärts ab der aktuellen Position
+            for (let i = currentIndex + 1; i < 10; i++) {
+                if (!missionProgress[currentType].includes(i)) {
+                    nextUnsolved = i;
+                    break;
+                }
+            }
+
+            // Falls vorwärts nichts gefunden wurde (z.B. man war bei 10), suche von vorne
+            if (nextUnsolved === -1) {
+                for (let i = 0; i < 10; i++) {
+                    if (!missionProgress[currentType].includes(i)) {
+                        nextUnsolved = i;
+                        break;
+                    }
+                }
+            }
+
+            if (nextUnsolved !== -1) {
+                currentIndex = nextUnsolved;
+                loadStep();
             } else {
+                // Nur zur Sicherheit: Falls doch alles gelöst ist
                 showMissionSummary();
             }
         }
