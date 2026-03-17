@@ -154,6 +154,20 @@
             align-items: center;
         }
 
+        .sidebar-footer {
+            margin-top: auto;
+            font-size: 0.7rem;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            opacity: 0.7;
+        }
+
+        .sidebar-footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            word-break: break-all;
+        }
+
         .close-btn { background: none; border: none; color: var(--text-color); cursor: pointer; }
 
         .nav-item {
@@ -433,6 +447,11 @@
             <div class="nav-item" onclick="openMissionMenu('txt'); toggleLeftSidebar();"><i data-lucide="message-square"></i> Text-Check</div>
             <div class="nav-item" onclick="openMissionMenu('fak'); toggleLeftSidebar();"><i data-lucide="help-circle"></i> Fakten-Radar</div>
             <div class="nav-item" onclick="openMissionMenu('dat'); toggleLeftSidebar();"><i data-lucide="lock"></i> Sicherheit</div>
+            
+            <div class="sidebar-footer">
+                Ansprechpartner:<br>
+                <a href="mailto:ualdinger@lmz-bw.de">ualdinger@lmz-bw.de</a>
+            </div>
         </aside>
 
         <button class="sidebar-toggle toggle-left hidden" id="btn-toggle-left" onclick="toggleLeftSidebar()"><i data-lucide="menu"></i></button>
@@ -587,7 +606,7 @@
                 { short: "Brille", media: "ki-brille.png", info: "Brillenrahmen verschmelzen oft unnatürlich mit der Haut oder den Haaren.", q: "Was ist bei KI-Brillen ein typischer Bildfehler?", a: ["Die Gläser sind immer dunkel", "Der Rahmen verschmilzt mit den Haaren oder dem Gesicht", "Die Brille ist immer zu groß"], c: 1, h: "Schau dir den Übergang zwischen Brillenbügel und Ohren oder Haaren an." },
                 { short: "Hintergrund", media: "ki-hintergrund.png", info: "Linien im Hintergrund (Fenster, Zäune) wirken in KI-Bildern oft verbogen.", q: "Welches Detail im Hintergrund verrät oft eine KI?", a: ["Die Farbe der Blumen", "Verbogene oder unlogische Linien an Gebäuden", "Dass die Sonne scheint"], c: 1, h: "Such nach geraden Kanten von Gebäuden – wirken sie im Hintergrund schief?" },
                 { short: "Haut", media: "ki-haut.png", info: "KI-Haut wirkt oft übernatürlich glatt, fast wie Plastik oder Porzellan.", q: "Wie sieht die Haut in vielen KI-Porträts aus?", a: ["Unnatürlich glatt, wie aus Plastik", "Viel zu faltig and alt", "Immer voller Sommersprossen"], c: 0, h: "Echte Haut hat Poren und kleine Unebenheiten. KI-Haut wirkt oft 'zu perfekt'." },
-                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links und rechts oft völlig unterschiedlich aus.", q: "Was ist bei den Ohren von KI-Menschen oft verdächtig?", a: ["Sie haben gar keine Ohren", "Sie sind asymmetrisch (links und rechts völlig verschieden)", "Sie sind immer unter Haaren versteckt"], c: 1, h: "Vergleiche das linke Ohr mit dem rechten. Sind die Ohrringe gleich?" },
+                { short: "Ohren", media: "ki-ohren.png", info: "Ohrringe oder die Form der Ohren sehen links and rechts oft völlig unterschiedlich aus.", q: "Was ist bei den Ohren von KI-Menschen oft verdächtig?", a: ["Sie haben gar keine Ohren", "Sie sind asymmetrisch (links und rechts völlig verschieden)", "Sie sind immer unter Haaren versteckt"], c: 1, h: "Vergleiche das linke Ohr mit dem rechten. Sind die Ohrringe gleich?" },
                 { short: "Schilder", media: "ki-schild.png", info: "Texte auf Schildern im Hintergrund sind für KIs schwer. Oft entstehen Fantasie-Buchstaben.", q: "Warum entlarven Schilder im Hintergrund oft ein KI-Bild?", a: ["Die Schilder sind immer blau", "Der Text besteht oft aus unleserlichem Buchstabensalat", "Es fehlen die Preise"], c: 1, h: "Versuche, ein einzelnes Wort auf dem Schild im Hintergrund zu lesen." },
                 { short: "Schatten", media: "ki-schatten.png", info: "Lichtquellen passen oft nicht zusammen. Schatten fallen in verschiedene Richtungen.", q: "Welcher Fehler tritt bei KI-Schatten häufig auf?", a: ["Die Schattenrichtung passt nicht zur Lichtquelle", "Es gibt im Bild niemals Schatten", "Der Schatten ist bunter als das Objekt"], c: 0, h: "Überlege: Wenn die Sonne oben links ist, wohin müsste der Schatten fallen?" },
                 { short: "Zähne", media: "ki-zaehne.png", info: "KIs malen oft zu viele Zähne oder die Zähne verschmelzen miteinander.", q: "Was macht ein KI-Lächeln oft 'unmenschlich'?", a: ["Die KI zeichnet oft zu viele oder verschmolzene Zähne", "Die Zähne fehlen komplett", "Die Zähne sind quadratisch"], c: 0, h: "Schau dir das Lächeln ganz nah an. Zähle die Zähne oder achte auf Lücken." },
